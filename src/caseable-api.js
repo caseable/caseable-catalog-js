@@ -12,7 +12,7 @@
             }
         );
         self.toObject = function() {
-            var obj = {}
+            var obj = {};
 
             Object.keys(attributeDefaults).forEach(
                 function(attribute) {
@@ -71,6 +71,7 @@
             address: {
                 firstName: '',
                 lastName: '',
+                company: '',
                 street: '',
                 postcode: '',
                 city: '',
