@@ -142,7 +142,7 @@
     }
 
     // private attributes
-    var baseApiUrl = 'http://freyja.caseable.test';
+    var baseApiUrl = 'http://catalog.caseable.com';
     var partner = undefined;
     var lang = undefined;
     var region = undefined;
