@@ -1,0 +1,17 @@
+{
+  "name": "unit",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "unit-test": "mocha ./tests/unit",
+    "make-dist": "cli.js --js_output_file dist/caseable-api.min.js src/caseable-api.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "google-closure-compiler": "^20180610.0.2",
+    "mocha": "^5.2.0",
+    "rewire": "^4.0.1"
+  }
+}
