@@ -491,7 +491,7 @@ describe('Caseable API', function() {
         it('Should fail to place an order with missing address first name', function(done) {
             $caseable.initialize('some-partner', 'en', 'eu');
             expect(mockConsole.nErrors).to.equal(0);
-            var request = new $caseable.OrderRequest(clone(validOrderRequest));
+            let request = new $caseable.OrderRequest(clone(validOrderRequest));
             request.address.firstName = undefined;
             $caseable.placeOrder(
                 request,
@@ -507,7 +507,7 @@ describe('Caseable API', function() {
         it('Should fail to place an order with missing address last name', function(done) {
             $caseable.initialize('some-partner', 'en', 'eu');
             expect(mockConsole.nErrors).to.equal(0);
-            var request = new $caseable.OrderRequest(clone(validOrderRequest));
+            let request = new $caseable.OrderRequest(clone(validOrderRequest));
             request.address.lastName = undefined;
             $caseable.placeOrder(
                 request,
@@ -523,7 +523,7 @@ describe('Caseable API', function() {
         it('Should fail to place an order with missing street address', function(done) {
             $caseable.initialize('some-partner', 'en', 'eu');
             expect(mockConsole.nErrors).to.equal(0);
-            var request = new $caseable.OrderRequest(clone(validOrderRequest));
+            let request = new $caseable.OrderRequest(clone(validOrderRequest));
             request.address.street = undefined;
             $caseable.placeOrder(
                 request,
@@ -539,7 +539,7 @@ describe('Caseable API', function() {
         it('Should fail to place an order with missing postcode', function(done) {
             $caseable.initialize('some-partner', 'en', 'eu');
             expect(mockConsole.nErrors).to.equal(0);
-            var request = new $caseable.OrderRequest(clone(validOrderRequest));
+            let request = new $caseable.OrderRequest(clone(validOrderRequest));
             request.address.postcode = undefined;
             $caseable.placeOrder(
                 request,
@@ -555,7 +555,7 @@ describe('Caseable API', function() {
         it('Should fail to place an order with missing city', function(done) {
             $caseable.initialize('some-partner', 'en', 'eu');
             expect(mockConsole.nErrors).to.equal(0);
-            var request = new $caseable.OrderRequest(clone(validOrderRequest));
+            let request = new $caseable.OrderRequest(clone(validOrderRequest));
             request.address.city = undefined;
             $caseable.placeOrder(
                 request,
@@ -571,7 +571,7 @@ describe('Caseable API', function() {
         it('Should fail to place an order with missing country', function(done) {
             $caseable.initialize('some-partner', 'en', 'eu');
             expect(mockConsole.nErrors).to.equal(0);
-            var request = new $caseable.OrderRequest(clone(validOrderRequest));
+            let request = new $caseable.OrderRequest(clone(validOrderRequest));
             request.address.country = undefined;
             $caseable.placeOrder(
                 request,
@@ -587,7 +587,7 @@ describe('Caseable API', function() {
         it('Should fail to place an order with missing customer first name', function(done) {
             $caseable.initialize('some-partner', 'en', 'eu');
             expect(mockConsole.nErrors).to.equal(0);
-            var request = new $caseable.OrderRequest(clone(validOrderRequest));
+            let request = new $caseable.OrderRequest(clone(validOrderRequest));
             request.customer.firstName = undefined;
             $caseable.placeOrder(
                 request,
@@ -603,7 +603,7 @@ describe('Caseable API', function() {
         it('Should fail to place an order with missing customer last name', function(done) {
             $caseable.initialize('some-partner', 'en', 'eu');
             expect(mockConsole.nErrors).to.equal(0);
-            var request = new $caseable.OrderRequest(clone(validOrderRequest));
+            let request = new $caseable.OrderRequest(clone(validOrderRequest));
             request.customer.lastName = undefined;
             $caseable.placeOrder(
                 request,
@@ -619,7 +619,7 @@ describe('Caseable API', function() {
         it('Should fail to place an order with missing customer email address', function(done) {
             $caseable.initialize('some-partner', 'en', 'eu');
             expect(mockConsole.nErrors).to.equal(0);
-            var request = new $caseable.OrderRequest(clone(validOrderRequest));
+            let request = new $caseable.OrderRequest(clone(validOrderRequest));
             request.customer.email = undefined;
             $caseable.placeOrder(
                 request,
@@ -635,7 +635,7 @@ describe('Caseable API', function() {
         it('Should fail to place an order with invalid customer email address', function(done) {
             $caseable.initialize('some-partner', 'en', 'eu');
             expect(mockConsole.nErrors).to.equal(0);
-            var request = new $caseable.OrderRequest(clone(validOrderRequest));
+            let request = new $caseable.OrderRequest(clone(validOrderRequest));
             request.customer.email = 'hans.mueller@';
             $caseable.placeOrder(
                 request,
@@ -651,7 +651,7 @@ describe('Caseable API', function() {
         it('Should fail to place an order with no items', function(done) {
             $caseable.initialize('some-partner', 'en', 'eu');
             expect(mockConsole.nErrors).to.equal(0);
-            var request = new $caseable.OrderRequest(clone(validOrderRequest));
+            let request = new $caseable.OrderRequest(clone(validOrderRequest));
             request.items = [];
             $caseable.placeOrder(
                 request,
@@ -667,9 +667,8 @@ describe('Caseable API', function() {
         it('Should place an order with proper parameters successfully', function(done) {
             $caseable.initialize('some-partner', 'en', 'eu');
             expect(mockConsole.nErrors).to.equal(0);
-            var request = new $caseable.OrderRequest(clone(validOrderRequest));
             $caseable.placeOrder(
-                request,
+                new $caseable.OrderRequest(validOrderRequest),
                 {user: '123', pass: '123'},
                 function(order) {
                     order = order.toObject();
