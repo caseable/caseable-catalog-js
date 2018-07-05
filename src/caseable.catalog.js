@@ -200,6 +200,14 @@
         (console && console.error) && console.error(message);
     }
 
+    function ensureInitialized(callback) {
+        if (!initialized) {
+            callback({error: 'The module needs to be initialized successfully first'}, undefined);
+            return false;
+        }
+        return true;
+    }
+
     function getXhrInstance() {
         try {
             return new XMLHttpRequest();
@@ -365,6 +373,9 @@
      * @param {Function} callback a callback which receives an array of {@link $caseable.Device}
      */
     function getDevices(callback) {
+
+        if (!ensureInitialized(callback)) return;
+
         ajaxRequest(
             '/devices/',
             'GET',
@@ -396,6 +407,9 @@
      * @param {Function} callback a callback which receives an array of {@link $caseable.Filter}
      */
     function getFilters(callback) {
+
+        if (!ensureInitialized(callback)) return;
+
         ajaxRequest(
             '/filters/',
             'GET',
@@ -426,16 +440,26 @@
      * @param {Function} callback a callback which receives an array of strings
      */
     function getFilterOptions(filterName, callback) {
-        if (filters.map(function(d) {return d.name}).indexOf(filterName) < 0) {
-            logError(
-                '`' + filterName + '` not found in the supported filters,' +
-                ' please use the list from $caseable.getFilters'
-            );
-            return;
-        }
 
-        ajaxRequest('/filters/' + filterName, 'GET', {partner: partner}, undefined, function(error, data) {
-            callback && callback(data);
+        if (!ensureInitialized(callback)) return;
+
+        getFilters(function(error, filters) {
+            if (error) {
+                callback && callback({error: 'failed to retrieve filters'}, undefined);
+                return;
+            }
+            if (filters.map(function(d) {return d.name}).indexOf(filterName) < 0) {
+                callback && callback(
+                    {
+                        message: '`' + filterName + '` not found in the supported filters,' +
+                            ' please use the list from $caseable.getFilters'
+                    },
+                    undefined
+                );
+                return;
+            }
+
+            ajaxRequest('/filters/' + filterName, 'GET', {partner: partner}, undefined, callback);
         });
     }
 
@@ -449,6 +473,8 @@
      * @param {Function} callback a callback which receives an array of {@link $caseable.ProductType}
      */
     function getProductTypes(callback) {
+
+        if (!ensureInitialized(callback)) return;
 
         // pre-fetch product types
         ajaxRequest(
@@ -495,43 +521,59 @@
      * @param {Function} callback a callback which receives an array of {@link $caseable.Product}
      */
     function getProducts(params, callback) {
+
+        if (!ensureInitialized(callback)) return;
+
         if (!params['type']) {
-            log('`type` parameter is required, please consult $caseable.getProductTypes', 'error');
+            logError('`type` parameter is required, please consult $caseable.getProductTypes', 'error');
             return;
         }
 
-        if (productTypes.map(function(pt) {return pt.id}).indexOf(params.type) < 0) {
-            log(
-                '`' + params.type + '` not found in the supported product types,' +
-                ' please use the list from $caseable.getProductTypes',
-                'error'
-            );
-            return;
-        }
+        getProductTypes(function(error, productTypes) {
 
-        var allowedParams = ['device', 'artist', 'category', 'color', 'gender', 'tag', 'limit', 'page'];
-        var queryParams = {};
-        allowedParams.forEach(function(param) {
-            if (param in params) queryParams[param] = params[param];
-        });
-
-        queryParams['partner'] = partner;
-        queryParams['lang'] = lang;
-        queryParams['region'] = region;
-
-        ajaxRequest('/products/' + params.type, 'GET', queryParams, undefined, function(data) {
-            if (!data.products) {
-                log('failed to retrieve products', 'error');
-                log(data);
+            if (error) {
+                callback && callback({error: 'failed to retrieve product types'}, undefined);
                 return;
             }
-            callback && callback(
-                data.products.map(
-                    function(obj) {
-                        return new Product(obj);
-                    }
-                )
-            );
+
+            if (productTypes.map(function(pt) {return pt.id}).indexOf(params.type) < 0) {
+                callback && callback(
+                    {
+                        error: '`' + params.type + '` not found in the supported product types',
+                        productTypes: productTypes
+                    },
+                    undefined
+                );
+                return;
+            }
+
+            // TODO also check the device if defined
+
+            var allowedParams = ['device', 'artist', 'category', 'color', 'gender', 'tag', 'limit', 'page'];
+            var queryParams = {};
+            allowedParams.forEach(function(param) {
+                if (param in params) queryParams[param] = params[param];
+            });
+
+            queryParams['partner'] = partner;
+            queryParams['lang'] = lang;
+            queryParams['region'] = region;
+
+            ajaxRequest('/products/' + params.type, 'GET', queryParams, undefined, function(error, data) {
+                if (error || !data.products) {
+                    logError('failed to retrieve products');
+                    callback(error, data);
+                    return;
+                }
+                callback && callback(
+                    undefined,
+                    data.products.map(
+                        function(obj) {
+                            return new Product(obj);
+                        }
+                    )
+                );
+            });
         });
     }
 
