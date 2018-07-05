@@ -353,97 +353,66 @@
 
         initialized = true;
 
-        // pre-fetch product types
-        ajaxRequest(
-            '/products',
-            'GET',
-            {
-                partner: partner,
-                lang: lang,
-                region: region
-            },
-            undefined,
-            function(error, data) {
-                if (!data.productTypes) {
-                    logError('failed to retrieve product types');
-                    log(data);
-                    return;
-                }
-                productTypes = data.productTypes.map(
-                    function(obj) {
-                        return new ProductType(obj);
-                    }
-                );
-            }
-        );
-
-        // pre-fetch devices
-        ajaxRequest(
-            '/devices',
-            'GET',
-            undefined,
-            undefined,
-            function(error, data) {
-                if (!data.devices) {
-                    logError('failed to retrieve devices');
-                    log(data);
-                    return;
-                }
-                devices = data.devices.map(
-                    function(obj) {
-                        return new Device(obj);
-                    }
-                );
-            }
-        );
-
-        // pre-fetch filters
-        ajaxRequest(
-            '/filters',
-            'GET',
-            undefined,
-            undefined,
-            function(error, data) {
-                if (!data.filters) {
-                    logError('failed to retrieve filters');
-                    log(data);
-                    return;
-                }
-                filters = data.filters.map(
-                    function(obj) {
-                        return new Filter(obj);
-                    }
-                );
-            }
-        );
     }
 
     /**
      * @function
      *
-     * @description retrieves avaialable devices. Note that this method is
-     * synchronous (i.e. will execute your callback immediately)
+     * @description retrieves avaialable devices.
      *
      * @memberof $caseable
      *
      * @param {Function} callback a callback which receives an array of {@link $caseable.Device}
      */
     function getDevices(callback) {
-        callback && callback(devices);
+        ajaxRequest(
+            '/devices/',
+            'GET',
+            undefined,
+            undefined,
+            function(error, data) {
+                if (error || !data.devices) {
+                    logError('failed to retrieve devices');
+                    log(data);
+                    callback && callback(error, data);
+                    return;
+                }
+                callback && callback(undefined, data.devices.map(function(obj) {
+                    return new Device(obj);
+                }));
+
+            }
+        );
+
     }
 
     /**
      * @function
      *
-     * @description retrieves supported filters. Note that this method is
-     * synchronous (i.e. will execute your callback immediately)
+     * @description retrieves supported filters.
      *
      * @memberof $caseable
      *
      * @param {Function} callback a callback which receives an array of {@link $caseable.Filter}
      */
     function getFilters(callback) {
-        callback && callback(filters);
+        ajaxRequest(
+            '/filters/',
+            'GET',
+            undefined,
+            undefined,
+            function(error, data) {
+                if (error || !data.filters) {
+                    logError('failed to retrieve filters');
+                    log(data);
+                    callback && callback(error, data);
+                    return;
+                }
+                callback && callback(undefined, data.filters.map(function(obj) {
+                    return new Filter(obj);
+                }));
+            }
+        );
     }
 
     /**
@@ -473,15 +442,37 @@
     /**
      * @function
      *
-     * @description retrieves supported product types. Note that this method is
-     * synchronous (i.e. will execute your callback immediately)
+     * @description retrieves supported product types.
      *
      * @memberof $caseable
      *
      * @param {Function} callback a callback which receives an array of {@link $caseable.ProductType}
      */
     function getProductTypes(callback) {
-        callback && callback(productTypes);
+
+        // pre-fetch product types
+        ajaxRequest(
+            '/products/',
+            'GET',
+            {
+                partner: partner,
+                lang: lang,
+                region: region
+            },
+            undefined,
+            function(error, data) {
+                if (error || !data.productTypes) {
+                    logError('failed to retrieve product types');
+                    log(error);
+                    log(data);
+                    callback && callback(error, data);
+                    return;
+                }
+                callback && callback(undefined, data.productTypes.map(function(obj) {
+                    return new ProductType(obj);
+                }));
+            }
+        );
     }
 
     /**
