@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "unit-test": "mocha ./tests/unit",
-    "make-dist": "cli.js --js_output_file dist/caseable-api.min.js src/caseable-api.js"
+    "make-dist": "google-closure-compiler --js_output_file dist/caseable.catalog.min.js dist/caseable.catalog.js",
+    "make-docs": "jsdoc src/caseable.catalog.js -d docs"
   },
   "author": "",
   "license": "ISC",
