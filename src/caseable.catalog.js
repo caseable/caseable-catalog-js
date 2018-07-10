@@ -35,16 +35,17 @@
  * <code>
  * <pre>
  *
- *  {@link $caseable.initialize}('your-partner-id', 'en', 'eu');
+ *  var inited = {@link $caseable.initialize}('', 'your-partner-id', 'eu', 'en');
  *
- *  // some time later (e.g. using setTimeout)
+ *  if (!inited) {
+ *    // some error handling
+ *  }
  *
  *  {@link $caseable.getProducts}(
  *    {
  *      type: "smartphone-flip-case",
  *      "color": "red"
  *    },
- *    { user: "xxx", pass: "xxx" },
  *    function(products) {
  *      // do something with the [Products]{@link $caseable.Product}
  *    }
@@ -58,7 +59,9 @@
 (function(scope, undefined) {
     'use strict';
 
-    var clone = (obj) => JSON.parse(JSON.stringify(obj));
+    function clone (obj) {
+        return JSON.parse(JSON.stringify(obj));
+    }
 
     function BaseClass(attributes, init) {
         var self = this;
@@ -340,6 +343,7 @@
      *
      * @memberof $caseable
      *
+     * @param {string} baseApiUrl the base API URL
      * @param {string} partner the partner's id
      * @param {string} region the preferred region
      * @param {string} lang the preferred language
