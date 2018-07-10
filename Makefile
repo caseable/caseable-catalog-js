@@ -1,5 +1,5 @@
 test: test-unit
-test-unit: src/caseable-api.js tests/unit/test_api.js node_modules
+test-unit: src/caseable.catalog.js tests/unit/test_catalog.js node_modules
 	npm run unit-test
 
 .PHONY: dist

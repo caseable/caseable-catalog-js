@@ -60,20 +60,20 @@
 
     var clone = (obj) => JSON.parse(JSON.stringify(obj));
 
-    function BaseClass(argAttributeDefaults, init) {
+    function BaseClass(attributes, init) {
         var self = this;
-        var attributeDefaults = clone(argAttributeDefaults);
-        this.attributeDefaults = attributeDefaults;
-        Object.keys(attributeDefaults).forEach(function(attribute) {
-            self[attribute] = (attribute in init) ? init[attribute] : attributeDefaults[attribute];
+        this.attributes = clone(attributes);
+        this.attributes.forEach(function(attribute) {
+            self[attribute] = (attribute in init) ? init[attribute] : attributes[attribute];
         });
     }
 
     BaseClass.prototype.toObject = function() {
         var obj = {};
+        var self = this;
 
-        Object.keys(this.attributeDefaults).forEach(function(attribute) {
-            obj[attribute] = this[attribute];
+        this.attributes.forEach(function(attribute) {
+            obj[attribute] = self[attribute];
         });
         return obj;
     };
@@ -97,20 +97,22 @@
      * @param {string} init.currency price currency
      */
     function Product(init) {
-        var attributeDefaults = {
-            sku: '',
-            artist: '',
-            design: '',
-            type: '',
-            device: '',
-            productionTime: {min: -1, max: -1},
-            thumbnailUrl: '',
-            price: -1,
-            currency: ''
-        };
+        var attributes = [
+            'sku',
+            'artist',
+            'design',
+            'type',
+            'device',
+            'productionTime',
+            'thumbnailUrl',
+            'price',
+            'currency'
+        ];
 
-        BaseClass.call(this, attributeDefaults, init);
+        BaseClass.call(this, attributes, init);
     }
+    Product.prototype = Object.create(BaseClass.prototype);
+    Product.prototype.constructor = Product;
 
    /**
      * @constructor
@@ -127,15 +129,17 @@
      * @param {int} init.productionTime.max maximum production time in days
      */
     function ProductType(init) {
-        var attributeDefaults = {
-            id: '',
-            name: '',
-            sku: '',
-            productionTime: {min: -1, max: -1}
-        };
+        var attributes = [
+            'id',
+            'name',
+            'sku',
+            'productionTime'
+        ];
 
-        BaseClass.call(this, attributeDefaults, init);
+        BaseClass.call(this, attributes, init);
     }
+    ProductType.prototype = Object.create(BaseClass.prototype);
+    ProductType.prototype.constructor = ProductType;
 
    /**
      * @constructor
@@ -151,16 +155,18 @@
      * @param {string} init.sku the device's sku part
      */
     function Device(init) {
-        var attributeDefaults = {
-            id: '',
-            name: '',
-            shortName: '',
-            brand: '',
-            sku: ''
-        };
+        var attributes = [
+            'id',
+            'name',
+            'shortName',
+            'brand',
+            'sku'
+        ];
 
-        BaseClass.call(this, attributeDefaults, init);
+        BaseClass.call(this, attributes, init);
     }
+    Device.prototype = Object.create(BaseClass.prototype);
+    Device.prototype.constructor = Device;
 
     /**
       * @constructor
@@ -174,14 +180,16 @@
       * @param {Array} init.options allowed filter options
       */
     function Filter(init) {
-        var attributeDefaults = {
-            name: '',
-            multiValue: false,
-            options: []
-        };
+        var attributes = [
+            'name',
+            'multiValue',
+            'options'
+        ];
 
-        BaseClass.call(this, attributeDefaults, init);
+        BaseClass.call(this, attributes, init);
     }
+    Filter.prototype = Object.create(BaseClass.prototype);
+    Filter.prototype.constructor = Filter;
 
     // private attributes
     var baseApiUrl;
@@ -335,6 +343,7 @@
      * @param {string} partner the partner's id
      * @param {string} region the preferred region
      * @param {string} lang the preferred language
+     * @return {boolean} whether initialization succeeded
      */
     function initialize(argBaseApiUrl, argPartner, argRegion, argLang) {
         // set private global parameters
@@ -347,7 +356,7 @@
 
         if (!baseApiUrl || !/https?:\/\/\S+/.test(baseApiUrl)) {
             logError('baseApiUrl is mandatory, quitting');
-            return;
+            return false;
         }
 
         if ('de, en, es, fr, it, pl'.indexOf(lang) < 0) {
@@ -356,11 +365,16 @@
 
         if ('ca, ch, eu, gb, jp, oc, pl, us'.indexOf(region) < 0) {
             logError('invalid region `' + region + '`, quitting');
-            return;
+            return false;
         }
 
         initialized = true;
+        return true;
+    }
 
+    function reset() {
+        partner = lang = region = baseApiUrl = undefined;
+        initialized = false;
     }
 
     /**
@@ -525,7 +539,12 @@
         if (!ensureInitialized(callback)) return;
 
         if (!params['type']) {
-            logError('`type` parameter is required, please consult $caseable.getProductTypes', 'error');
+            logError('`type` parameter is required, please consult $caseable.getProductTypes');
+            callback && callback(
+                {
+                    error: '`type` parameter is required, please consult $caseable.getProductTypes'
+                }
+            );
             return;
         }
 
@@ -547,7 +566,7 @@
                 return;
             }
 
-            // TODO also check the device if defined
+            // TODO also check the device if specified
 
             var allowedParams = ['device', 'artist', 'category', 'color', 'gender', 'tag', 'limit', 'page'];
             var queryParams = {};
@@ -581,6 +600,7 @@
 
     var publicApi = {
         initialize: initialize,
+        reset: reset,
         getFilters: getFilters,
         getFilterOptions: getFilterOptions,
         getProductTypes: getProductTypes,
