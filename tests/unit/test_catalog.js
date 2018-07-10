@@ -6,7 +6,7 @@ let expect = chai.expect;
 const baseApiUrl = 'http://catalog.caseable.com';
 
 // mock the console to catch notices
-let mockConsole = {
+const mockConsole = {
     nErrors: 0,
     error: function(arg1, arg2, arg3) {
         this.nErrors++;
@@ -19,7 +19,7 @@ let mockConsole = {
 // mock XMLHttpRequest
 
 // a map from urls (defind as regular expressions) to data
-var XMLHttpRequestData = {};
+const XMLHttpRequestData = {};
 
 const URLS = {
     products: 'https?://[^/\\\s?!]+/products/smartphone-hard-case.*',
@@ -90,8 +90,20 @@ XMLHttpRequestData[URLS.products] = {
 
 XMLHttpRequestData[URLS.devices] = {
     'devices': [
-        {id: 'apple-iphone-5', name: 'Apple iPhone 5', shortName: 'iPhone 5', brand: 'Apple', sku: 'APIP50'},
-        {id: 'samsung-galaxy-9', name: 'Galaxy 9', shortName: 'Galaxy 9', brand: 'Samsung', sku: 'SAGX950'}
+        {
+            id: 'apple-iphone-5',
+            name: 'Apple iPhone 5',
+            shortName: 'iPhone 5',
+            brand: 'Apple',
+            sku: 'APIP50'
+        },
+        {
+            id: 'samsung-galaxy-9',
+            name: 'Galaxy 9',
+            shortName: 'Galaxy 9',
+            brand: 'Samsung',
+            sku: 'SAGX950'
+        }
     ]
 };
 
@@ -104,7 +116,7 @@ XMLHttpRequestData[URLS.filters] = {
 
 XMLHttpRequestData[URLS.filterGender] = XMLHttpRequestData[URLS.filters].filters[1];
 
-let mockXMLHttpRequest = function() {
+const mockXMLHttpRequest = function() {
     var self = this;
 
     self.url = null;
@@ -121,8 +133,8 @@ let mockXMLHttpRequest = function() {
 
     self.setRequestHeader = function(n, v) {};
 
-    self.open = function(verb, url) {
-        self.url = url;
+    self.open = function(verb, argUrl) {
+        self.url = argUrl;
         self.verb = verb;
 
         // find matching data
@@ -134,7 +146,7 @@ let mockXMLHttpRequest = function() {
             'filters',
             'devices'
         ];
-        for (url of urlOrder) {
+        for (const url of urlOrder) {
             var urlRegex = URLS[url];
             let regex = new RegExp(urlRegex);
             if (regex.test(self.url)) {
