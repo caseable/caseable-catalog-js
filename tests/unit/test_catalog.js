@@ -191,20 +191,6 @@ describe('Caseable API', function() {
       done();
     });
 
-    it('Should fail on invalid region', function(done) {
-      let inited = $caseable.initialize(baseApiUrl, 'some-partner', 'invalid-region', 'en');
-      expect(inited).to.be.false;
-      expect(mockConsole.nErrors).to.equal(1);
-      done();
-    });
-
-    it('Should warn on invalid language, but still initialize', function(done) {
-      let inited = $caseable.initialize(baseApiUrl, 'some-partner', 'eu', 'invalid-language');
-      expect(mockConsole.nErrors).to.equal(1);
-      expect(inited).to.be.true;
-      done();
-    });
-
     it('Should be initialized with no warnings with proper parameters', function(done) {
       let inited = $caseable.initialize(baseApiUrl, 'some-partner', 'eu', 'en');
       expect(inited).to.be.true;
@@ -229,8 +215,13 @@ describe('Caseable API', function() {
         expect(error).to.be.undefined;
         expect(mockConsole.nErrors).to.equal(0);
         expect(devices).to.be.an('array');
-        devices = devices.map((device) => device.toObject());
-        expect(devices).to.deep.equal(XMLHttpRequestData[URLS.devices].devices);
+        const modelDevice = XMLHttpRequestData[URLS.devices].devices[0]
+        devices.forEach(function(device) {
+            var prop;
+            for(prop in modelDevice) {
+                expect(device).to.have.property(prop)
+            }
+        });
         done();
       });
     });
@@ -252,8 +243,13 @@ describe('Caseable API', function() {
         expect(error).to.be.undefined;
         expect(mockConsole.nErrors).to.equal(0);
         expect(filters).to.be.an('array');
-        filters = filters.map((filter) => filter.toObject());
-        expect(filters).to.deep.equal(XMLHttpRequestData[URLS.filters].filters);
+        const modelFilter = XMLHttpRequestData[URLS.filters].filters[0]
+        filters.forEach(function(filter) {
+            var prop;
+            for(prop in modelFilter) {
+                expect(filter).to.have.property(prop)
+            }
+        });
         done();
       });
     });
@@ -295,8 +291,13 @@ describe('Caseable API', function() {
         expect(error).to.be.undefined;
         expect(mockConsole.nErrors).to.equal(0);
         expect(productTypes).to.be.an('array');
-        productTypes = productTypes.map((productType) => productType.toObject());
-        expect(productTypes).to.deep.equal(XMLHttpRequestData[URLS.productTypes].productTypes);
+        const modelProductType = XMLHttpRequestData[URLS.productTypes].productTypes[0]
+        productTypes.forEach(function(productType) {
+            var prop;
+            for(prop in modelProductType) {
+                expect(productType).to.have.property(prop)
+            }
+        });
         done();
       });
     });
@@ -336,8 +337,13 @@ describe('Caseable API', function() {
         expect(error).to.be.undefined;
         expect(mockConsole.nErrors).to.equal(0);
         expect(products).to.be.an('array');
-        products = products.map((p) => p.toObject());
-        expect(products).to.deep.equal(XMLHttpRequestData[URLS.products].products);
+        const modelProduct = XMLHttpRequestData[URLS.products].products[0]
+        products.forEach(function(product) {
+            var prop;
+            for(prop in modelProduct) {
+                expect(product).to.have.property(prop)
+            }
+        });
         done();
       });
     });

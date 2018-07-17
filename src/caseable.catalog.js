@@ -60,14 +60,27 @@
   'use strict';
 
   function clone(obj) {
-    return JSON.parse(JSON.stringify(obj));
+    if (typeof obj == 'object') {
+      var isArray = typeof obj.indexOf == 'function';
+      var objClone = isArray ? [] : {};
+      for (var i in obj) {
+        if (obj.hasOwnProperty(i)) {
+          if (isArray) objClone.push(clone(obj[i]));
+          else objClone[i] = clone(obj[i]);
+        }
+      }
+      return objClone;
+    } else {
+      return obj;
+    }
   }
 
   function BaseClass(attributes, init) {
     var self = this;
+    init = init || {}
     this.attributes = clone(attributes);
     this.attributes.forEach(function(attribute) {
-      self[attribute] = (attribute in init) ? init[attribute] : attributes[attribute];
+      self[attribute] = init[attribute];
     });
   }
 
@@ -78,7 +91,7 @@
     this.attributes.forEach(function(attribute) {
       obj[attribute] = self[attribute];
     });
-    return obj;
+    return clone(obj);
   };
 
    /**
@@ -204,62 +217,42 @@
   // private methods
 
   function log(message) {
-    (console && console.info) && console.info(message);
+    console && console.info && console.info(message);
   }
 
   function logError(message) {
-    (console && console.error) && console.error(message);
-  }
-
-  function ensureInitialized(callback) {
-    if (!initialized) {
-      callback({error: 'The module needs to be initialized successfully first'}, undefined);
-      return false;
-    }
-    return true;
+    console && console.error && console.error(message);
   }
 
   function getXhrInstance() {
-    try {
-      return new XMLHttpRequest();
-    } catch (e) {}
-    try {
-      return new ActiveXObject('Msxml3.XMLHTTP');
-    } catch (e) {}
-    try {
-      return new ActiveXObject('Msxml2.XMLHTTP.6.0');
-    } catch (e) {}
-    try {
-      return new ActiveXObject('Msxml2.XMLHTTP.3.0');
-    } catch (e) {}
-    try {
-      return new ActiveXObject('Msxml2.XMLHTTP');
-    } catch (e) {}
-    try {
-      return new ActiveXObject('Microsoft.XMLHTTP');
-    } catch (e) {}
+    if (XMLHttpRequest) return new XMLHttpRequest();
+
+    if (ActiveXObject) {
+      try {
+        return new ActiveXObject('Msxml3.XMLHTTP');
+      } catch (e) {}
+      try {
+        return new ActiveXObject('Msxml2.XMLHTTP.6.0');
+      } catch (e) {}
+      try {
+        return new ActiveXObject('Msxml2.XMLHTTP.3.0');
+      } catch (e) {}
+    }
+
     return null;
   }
 
-  function ajaxRequest(endpoint, method, parameters, credentials, callback) {
+  function ajaxRequest(method, endpoint, parameters, credentials, callback) {
 
     var xhr = getXhrInstance();
     var url;
     var query = '';
+    callback = typeof callback === 'function' ? callback : function() {}
 
     if (!xhr) {
       logError('Failed to instiantiate XHR, quitting!');
+      callback({connectionError: 'Failed to instiantiate XHR, quitting!'})
       return;
-    }
-
-    // filter invalid lang and region parameters
-
-    if (parameters && !lang) {
-      delete parameters['lang'];
-    }
-
-    if (parameters && !region) {
-      delete parameters['region'];
     }
 
     if (method === 'GET' && parameters) {
@@ -280,45 +273,42 @@
       } catch (e) {
         response = xhr.responseText;
         error['parseError'] = e.toString();
+        callback(error, response)
+        return
       }
       if (xhr.status === 200 || xhr.status === 201) {
-        callback && callback(
-          Object.keys(error).length ? error : undefined,
-          response
-        );
+        callback(undefined, response);
       } else {
         logError('Request failed. Returned status of ' + xhr.status);
         error['invalidStatus'] = xhr.status;
-        callback && callback(error, response);
+        callback(error, response);
       }
     });
 
     xhr.addEventListener('error', function() {
-      var response;
       var error = {
         error: 'transfer error occurred'
       };
       try {
-        response = JSON.parse(xhr.responseText);
+        error.payload = JSON.parse(xhr.responseText);
       } catch (e) {
-        response = xhr.responseText;
+        error.payload = xhr.responseText;
         error['parseError'] = e.toString();
       }
-      callback && callback(error, response);
+      callback(error);
     });
 
     xhr.addEventListener('abort', function() {
-      var response;
       var error = {
         error: 'transfer aborted'
       };
       try {
-        response = JSON.parse(xhr.responseText);
+        error.payload = JSON.parse(xhr.responseText);
       } catch (e) {
-        response = xhr.responseText;
+        error.payload = xhr.responseText;
         error['parseError'] = e.toString();
       }
-      callback && callback(error, response);
+      callback(error);
     });
 
     xhr.open(method, url);
@@ -363,21 +353,15 @@
       return false;
     }
 
-    if ('de, en, es, fr, it, pl'.indexOf(lang) < 0) {
-      logError('invalid language `' + lang + '`, a default value will be used');
-    }
-
-    if ('ca, ch, eu, gb, jp, oc, pl, us'.indexOf(region) < 0) {
-      logError('invalid region `' + region + '`, quitting');
-      return false;
-    }
-
     initialized = true;
     return true;
   }
 
   function reset() {
-    partner = lang = region = baseApiUrl = undefined;
+    partner = undefined;
+    lang = undefined;
+    region = undefined;
+    baseApiUrl = undefined;
     initialized = false;
   }
 
@@ -391,24 +375,27 @@
    * @param {Function} callback a callback which receives an array of {@link $caseable.Device}
    */
   function getDevices(callback) {
+    callback = typeof callback === 'function' ? callback : function() {}
 
-    if (!ensureInitialized(callback)) return;
+    if (!initialized) {
+       callback({error: 'The API needs to be initialized successfully first'});
+       return
+    }
+
 
     ajaxRequest(
-      '/devices/',
       'GET',
+      '/devices/',
       undefined,
       undefined,
       function(error, data) {
         if (error || !data.devices) {
           logError('failed to retrieve devices');
           log(data);
-          callback && callback(error, data);
+          callback(error, data);
           return;
         }
-        callback && callback(undefined, data.devices.map(function(obj) {
-          return new Device(obj);
-        }));
+        callback(undefined, data.devices);
 
       }
     );
@@ -425,24 +412,26 @@
    * @param {Function} callback a callback which receives an array of {@link $caseable.Filter}
    */
   function getFilters(callback) {
+    callback = typeof callback === 'function' ? callback : function() {}
 
-    if (!ensureInitialized(callback)) return;
+    if (!initialized) {
+       callback({error: 'The API needs to be initialized successfully first'});
+       return
+    }
 
     ajaxRequest(
-      '/filters/',
       'GET',
+      '/filters/',
       undefined,
       undefined,
       function(error, data) {
         if (error || !data.filters) {
           logError('failed to retrieve filters');
           log(data);
-          callback && callback(error, data);
+          callback(error, data);
           return;
         }
-        callback && callback(undefined, data.filters.map(function(obj) {
-          return new Filter(obj);
-        }));
+        callback(undefined, data.filters);
       }
     );
   }
@@ -458,26 +447,30 @@
    * @param {Function} callback a callback which receives an array of strings
    */
   function getFilterOptions(filterName, callback) {
+    callback = typeof callback === 'function' ? callback : function() {}
 
-    if (!ensureInitialized(callback)) return;
+    if (!initialized) {
+       callback({error: 'The API needs to be initialized successfully first'});
+       return
+    }
 
     getFilters(function(error, filters) {
       if (error) {
-        callback && callback({error: 'failed to retrieve filters'}, undefined);
+        callback({error: 'failed to retrieve filters'});
         return;
       }
-      if (filters.map(function(d) {return d.name}).indexOf(filterName) < 0) {
-        callback && callback(
+      var filterNames = filters.map(function(filter) {return filter.name});
+      if (filterNames.indexOf(filterName) < 0) {
+        callback(
           {
             message: '`' + filterName + '` not found in the supported filters,' +
               ' please use the list from $caseable.getFilters'
-          },
-          undefined
+          }
         );
         return;
       }
 
-      ajaxRequest('/filters/' + filterName, 'GET', {partner: partner}, undefined, callback);
+      ajaxRequest('GET', '/filters/' + filterName, {partner: partner}, undefined, callback);
     });
   }
 
@@ -491,13 +484,17 @@
    * @param {Function} callback a callback which receives an array of {@link $caseable.ProductType}
    */
   function getProductTypes(callback) {
+    callback = typeof callback === 'function' ? callback : function() {}
 
-    if (!ensureInitialized(callback)) return;
+    if (!initialized) {
+       callback({error: 'The API needs to be initialized successfully first'});
+       return
+    }
 
     // pre-fetch product types
     ajaxRequest(
-      '/products/',
       'GET',
+      '/products/',
       {
         partner: partner,
         lang: lang,
@@ -509,12 +506,10 @@
           logError('failed to retrieve product types');
           log(error);
           log(data);
-          callback && callback(error, data);
+          callback(error, data);
           return;
         }
-        callback && callback(undefined, data.productTypes.map(function(obj) {
-          return new ProductType(obj);
-        }));
+        callback(undefined, data.productTypes);
       }
     );
   }
@@ -539,28 +534,33 @@
    * @param {Function} callback a callback which receives an array of {@link $caseable.Product}
    */
   function getProducts(params, callback) {
+    callback = typeof callback === 'function' ? callback : function() {}
 
-    if (!ensureInitialized(callback)) return;
+    if (!initialized) {
+       callback({error: 'The API needs to be initialized successfully first'});
+       return
+    }
 
     if (!params['type']) {
-      logError('`type` parameter is required, please consult $caseable.getProductTypes');
-      callback && callback(
+      var typeRequiredMsg = '`type` parameter is required';
+      logError(typeRequiredMsg);
+      callback(
         {
-          error: '`type` parameter is required, please consult $caseable.getProductTypes'
+          error: typeRequiredMsg
         }
       );
       return;
     }
 
     getProductTypes(function(error, productTypes) {
-
+      callback = typeof callback === 'function' ? callback : function() {}
       if (error) {
-        callback && callback({error: 'failed to retrieve product types'}, undefined);
+        callback({error: 'failed to retrieve product types'});
         return;
       }
 
       if (productTypes.map(function(pt) {return pt.id}).indexOf(params.type) < 0) {
-        callback && callback(
+        callback(
           {
             error: '`' + params.type + '` not found in the supported product types',
             productTypes: productTypes
@@ -582,20 +582,13 @@
       queryParams['lang'] = lang;
       queryParams['region'] = region;
 
-      ajaxRequest('/products/' + params.type, 'GET', queryParams, undefined, function(error, data) {
+      ajaxRequest('GET', '/products/' + params.type, queryParams, undefined, function(error, data) {
         if (error || !data.products) {
           logError('failed to retrieve products');
           callback(error, data);
           return;
         }
-        callback && callback(
-          undefined,
-          data.products.map(
-            function(obj) {
-              return new Product(obj);
-            }
-          )
-        );
+        callback(undefined, data.products);
       });
     });
   }
@@ -613,7 +606,8 @@
   };
 
   if (typeof module != 'undefined' && typeof module.exports != 'undefined') {
-    for (var prop in publicApi) {
+    var prop
+    for (prop in publicApi) {
       module.exports[prop] = publicApi[prop];
     }
   }

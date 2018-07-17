@@ -13,7 +13,7 @@ to use the library in your app.
 2. Clone the repository somewhere (say `<repo-directory>`).
 3. Optionally make sure the tests pass:
 
-    ```cd <repo-directory> && make test```
+    `cd <repo-directory> && make test`
 4. Create the distribution package and documentation:
 
-    ```cd <repo-directory> && make dist docs```
+    `cd <repo-directory> && make dist docs`

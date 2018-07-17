@@ -1,5 +1,6 @@
+.PHONY: test test-unit
 test: test-unit
-test-unit: src/caseable.catalog.js tests/unit/test_catalog.js node_modules
+test-unit: node_modules
 	npm run unit-test
 
 .PHONY: dist
@@ -12,6 +13,7 @@ dist: src/caseable.catalog.js node_modules
 docs: src/caseable.catalog.js node_modules
 	npm run make-docs
 
+.PHONY: clean
 clean:
 	rm -rf dist docs
 
