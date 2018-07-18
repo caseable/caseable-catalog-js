@@ -519,7 +519,9 @@
       }
     );
   }
-
+  /**
+   * @typedef {Array<Array<string, string>>} PairsArray
+   */
   /**
    * @function
    *
@@ -527,16 +529,17 @@
    *
    * @memberof $caseable
    *
+   *
+   *
    * @param {string} params.type product type, this is the only mandatory parameter
-   * @param {Array} params search parameters as an array of name-value pairs
-   * @param {string} params.device comma-separated list of device ids
-   * @param {string} params.artist comma-separated list of artist ids
-   * @param {string} params.category comma-separated list of category ids
-   * @param {string} params.color comma-separated list of colors ids
-   * @param {string} params.gender either "male" or "female"
-   * @param {string} params.tag comma-separated list of tags
-   * @param {int} params.device maximum number of products returned
-   * @param {int} params.device page number
+   * @param {Object[]} params search parameters as an array of name-value pairs.
+   *                possible parameters are documented below
+   * @param {string} params[].0 one of {'artist', 'device', 'category',
+   *                 'color', 'gender', 'tag', 'limit', 'page'}
+   *
+   * @param {string} params[].1 comma-separated list of ids, excluding the attributes: <br>
+   *                 'gender': 'male' or 'female' <br>
+   *                 'page' and 'limit': an integer
    * @param {Function} callback a callback which receives an array of {@link $caseable.Product}
    */
   function getProducts(type, params, callback) {
