@@ -77,7 +77,7 @@
 
   function BaseClass(attributes, init) {
     var self = this;
-    init = init || {}
+    init = init || {};
     this.attributes = clone(attributes);
     this.attributes.forEach(function(attribute) {
       self[attribute] = init[attribute];
@@ -247,18 +247,20 @@
     var xhr = getXhrInstance();
     var url;
     var query = '';
-    callback = typeof callback === 'function' ? callback : function() {}
+    callback = typeof callback === 'function' ? callback : function() {};
 
     if (!xhr) {
       logError('Failed to instiantiate XHR, quitting!');
-      callback({connectionError: 'Failed to instiantiate XHR, quitting!'})
+      callback({connectionError: 'Failed to instiantiate XHR, quitting!'});
       return;
     }
 
     if (method === 'GET' && parameters) {
       var query = '?';
-      Object.keys(parameters).forEach(function(name) {
-        query += encodeURIComponent(name) + '=' + encodeURIComponent(parameters[name]) + '&';
+      parameters.forEach(function(pair) {
+        var name = pair[0];
+        var value = pair[1];
+        query += encodeURIComponent(name) + '=' + encodeURIComponent(value) + '&';
       });
       query = query.substring(0, query.length - 1);
     }
@@ -273,8 +275,8 @@
       } catch (e) {
         response = xhr.responseText;
         error['parseError'] = e.toString();
-        callback(error, response)
-        return
+        callback(error, response);
+        return;
       }
       if (xhr.status === 200 || xhr.status === 201) {
         callback(undefined, response);
@@ -375,11 +377,11 @@
    * @param {Function} callback a callback which receives an array of {@link $caseable.Device}
    */
   function getDevices(callback) {
-    callback = typeof callback === 'function' ? callback : function() {}
+    callback = typeof callback === 'function' ? callback : function() {};
 
     if (!initialized) {
        callback({error: 'The API needs to be initialized successfully first'});
-       return
+       return;
     }
 
 
@@ -412,11 +414,11 @@
    * @param {Function} callback a callback which receives an array of {@link $caseable.Filter}
    */
   function getFilters(callback) {
-    callback = typeof callback === 'function' ? callback : function() {}
+    callback = typeof callback === 'function' ? callback : function() {};
 
     if (!initialized) {
        callback({error: 'The API needs to be initialized successfully first'});
-       return
+       return;
     }
 
     ajaxRequest(
@@ -447,11 +449,11 @@
    * @param {Function} callback a callback which receives an array of strings
    */
   function getFilterOptions(filterName, callback) {
-    callback = typeof callback === 'function' ? callback : function() {}
+    callback = typeof callback === 'function' ? callback : function() {};
 
     if (!initialized) {
        callback({error: 'The API needs to be initialized successfully first'});
-       return
+       return;
     }
 
     getFilters(function(error, filters) {
@@ -470,7 +472,12 @@
         return;
       }
 
-      ajaxRequest('GET', '/filters/' + filterName, {partner: partner}, undefined, callback);
+      ajaxRequest(
+          'GET', '/filters/' + filterName,
+          [['partner', partner]],
+          undefined,
+          callback
+      );
     });
   }
 
@@ -484,22 +491,21 @@
    * @param {Function} callback a callback which receives an array of {@link $caseable.ProductType}
    */
   function getProductTypes(callback) {
-    callback = typeof callback === 'function' ? callback : function() {}
+    callback = typeof callback === 'function' ? callback : function() {};
 
     if (!initialized) {
        callback({error: 'The API needs to be initialized successfully first'});
-       return
+       return;
     }
 
-    // pre-fetch product types
     ajaxRequest(
       'GET',
       '/products/',
-      {
-        partner: partner,
-        lang: lang,
-        region: region
-      },
+      [
+        ['partner', partner],
+        ['lang', lang],
+        ['region', region]
+      ],
       undefined,
       function(error, data) {
         if (error || !data.productTypes) {
@@ -521,8 +527,8 @@
    *
    * @memberof $caseable
    *
-   * @param {Object} params search parameters
    * @param {string} params.type product type, this is the only mandatory parameter
+   * @param {Array} params search parameters as an array of name-value pairs
    * @param {string} params.device comma-separated list of device ids
    * @param {string} params.artist comma-separated list of artist ids
    * @param {string} params.category comma-separated list of category ids
@@ -533,56 +539,64 @@
    * @param {int} params.device page number
    * @param {Function} callback a callback which receives an array of {@link $caseable.Product}
    */
-  function getProducts(params, callback) {
-    callback = typeof callback === 'function' ? callback : function() {}
+  function getProducts(type, params, callback) {
+    callback = typeof callback === 'function' ? callback : function() {};
 
     if (!initialized) {
        callback({error: 'The API needs to be initialized successfully first'});
-       return
+       return;
     }
 
-    if (!params['type']) {
+    if (!type) {
       var typeRequiredMsg = '`type` parameter is required';
       logError(typeRequiredMsg);
-      callback(
-        {
-          error: typeRequiredMsg
-        }
-      );
+      callback({error: typeRequiredMsg});
       return;
     }
 
-    getProductTypes(function(error, productTypes) {
-      callback = typeof callback === 'function' ? callback : function() {}
+    getFilters(function(error, filters) {
       if (error) {
-        callback({error: 'failed to retrieve product types'});
+        callback({error: 'failed to retrieve filters'});
         return;
       }
 
-      if (productTypes.map(function(pt) {return pt.id}).indexOf(params.type) < 0) {
+      var filterIsMultiValue = {};
+
+      filters.forEach(function(filter) {
+          filterIsMultiValue[filter.name] = filter.multiValue;
+      });
+
+      var errors = [];
+      var seen = {};
+      params.forEach(function(pair) {
+        var name = pair[0];
+        var value = pair[1];
+        if (filterIsMultiValue[name] === undefined) {
+            errors.push('undefined filter ' + name);
+            return;
+        }
+        if (seen[name] && !filterIsMultiValue[name]) {
+            errors.push('multiple values are not allowed for ' + name);
+            return;
+        }
+        seen[name] = true;
+      });
+
+      if (errors.length > 0) {
         callback(
           {
-            error: '`' + params.type + '` not found in the supported product types',
-            productTypes: productTypes
-          },
-          undefined
+            error: 'Params have the following issues:\n  ' + errors.join('\n  ')
+          }
         );
         return;
       }
 
-      // TODO also check the device if specified
-
-      var allowedParams = ['device', 'artist', 'category', 'color', 'gender', 'tag', 'limit', 'page'];
-      var queryParams = {};
-      allowedParams.forEach(function(param) {
-        if (param in params) queryParams[param] = params[param];
-      });
-
-      queryParams['partner'] = partner;
-      queryParams['lang'] = lang;
-      queryParams['region'] = region;
-
-      ajaxRequest('GET', '/products/' + params.type, queryParams, undefined, function(error, data) {
+      var queryParams = params.concat([
+          ['partner', partner],
+          ['lang', lang],
+          ['region', region]
+      ]);
+      ajaxRequest('GET', '/products/' + type, queryParams, undefined, function(error, data) {
         if (error || !data.products) {
           logError('failed to retrieve products');
           callback(error, data);
@@ -606,7 +620,7 @@
   };
 
   if (typeof module != 'undefined' && typeof module.exports != 'undefined') {
-    var prop
+    var prop;
     for (prop in publicApi) {
       module.exports[prop] = publicApi[prop];
     }

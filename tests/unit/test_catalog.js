@@ -109,7 +109,8 @@ XMLHttpRequestData[URLS.devices] = {
 
 XMLHttpRequestData[URLS.filters] = {
   'filters': [
-    {name: 'artist', multiValue: true, options: []},
+    {name: 'tags', multiValue: true, options: []},
+    {name: 'artist', multiValue: false, options: []},
     {name: 'gender', multiValue: false, options: ['m', 'f']}
   ]
 };
@@ -201,9 +202,9 @@ describe('Caseable API', function() {
 
   describe('Devices', function() {
     it('Should fail to retrieve devices without initialization', function(done) {
-      $caseable.getDevices(function(error, devices) {
-        expect(error).to.be.an('object');
-        expect(error).to.have.property('error');
+      $caseable.getDevices(function(err, devices) {
+        expect(err).to.be.an('object');
+        expect(err).to.have.property('error');
         expect(devices).to.be.undefined;
         done();
       });
@@ -211,15 +212,15 @@ describe('Caseable API', function() {
 
     it('Should retrieve correct devices successfully after initialization', function(done) {
       $caseable.initialize(baseApiUrl, 'some-partner', 'eu', 'en');
-      $caseable.getDevices(function(error, devices) {
-        expect(error).to.be.undefined;
+      $caseable.getDevices(function(err, devices) {
+        expect(err).to.be.undefined;
         expect(mockConsole.nErrors).to.equal(0);
         expect(devices).to.be.an('array');
-        const modelDevice = XMLHttpRequestData[URLS.devices].devices[0]
+        const modelDevice = XMLHttpRequestData[URLS.devices].devices[0];
         devices.forEach(function(device) {
             var prop;
-            for(prop in modelDevice) {
-                expect(device).to.have.property(prop)
+            for (prop in modelDevice) {
+                expect(device).to.have.property(prop);
             }
         });
         done();
@@ -229,9 +230,9 @@ describe('Caseable API', function() {
 
   describe('Filters', function() {
     it('Should fail to retrieve filters without initialization', function(done) {
-      $caseable.getDevices(function(error, filters) {
-        expect(error).to.be.an('object');
-        expect(error).to.have.property('error');
+      $caseable.getDevices(function(err, filters) {
+        expect(err).to.be.an('object');
+        expect(err).to.have.property('error');
         expect(filters).to.be.undefined;
         done();
       });
@@ -239,15 +240,15 @@ describe('Caseable API', function() {
 
     it('Should retrieve correct filters successfully after initialization', function(done) {
       $caseable.initialize(baseApiUrl, 'some-partner', 'eu', 'en');
-      $caseable.getFilters(function(error, filters) {
-        expect(error).to.be.undefined;
+      $caseable.getFilters(function(err, filters) {
+        expect(err).to.be.undefined;
         expect(mockConsole.nErrors).to.equal(0);
         expect(filters).to.be.an('array');
-        const modelFilter = XMLHttpRequestData[URLS.filters].filters[0]
+        const modelFilter = XMLHttpRequestData[URLS.filters].filters[0];
         filters.forEach(function(filter) {
             var prop;
-            for(prop in modelFilter) {
-                expect(filter).to.have.property(prop)
+            for (prop in modelFilter) {
+                expect(filter).to.have.property(prop);
             }
         });
         done();
@@ -255,18 +256,18 @@ describe('Caseable API', function() {
     });
 
     it('Should fail to retrieve filter options without initialization', function(done) {
-      $caseable.getDevices(function(error, filterOptions) {
-        expect(error).to.be.an('object');
-        expect(error).to.have.property('error');
+      $caseable.getDevices(function(err, filterOptions) {
+        expect(err).to.be.an('object');
+        expect(err).to.have.property('error');
         expect(filterOptions).to.be.undefined;
         done();
       });
     });
 
-    it('Should retrieve correct `gender` filter options successfully after initialization', function(done) {
+    it('Should retrieve filter options after initialization', function(done) {
       $caseable.initialize(baseApiUrl, 'some-partner', 'eu', 'en');
-      $caseable.getFilterOptions('gender', function(error, filterOptions) {
-        expect(error).to.be.undefined;
+      $caseable.getFilterOptions('gender', function(err, filterOptions) {
+        expect(err).to.be.undefined;
         expect(mockConsole.nErrors).to.equal(0);
         expect(filterOptions).to.be.a('object');
         expect(filterOptions).to.deep.equal(XMLHttpRequestData[URLS.filterGender]);
@@ -277,9 +278,9 @@ describe('Caseable API', function() {
 
   describe('Products', function() {
     it('Should fail to retrieve product types without initialization', function(done) {
-      $caseable.getProductTypes(function(error, productTypes) {
-        expect(error).to.be.an('object');
-        expect(error).to.have.property('error');
+      $caseable.getProductTypes(function(err, productTypes) {
+        expect(err).to.be.an('object');
+        expect(err).to.have.property('error');
         expect(productTypes).to.be.undefined;
         done();
       });
@@ -287,15 +288,15 @@ describe('Caseable API', function() {
 
     it('Should retrieve correct product types successfully after initialization', function(done) {
       $caseable.initialize(baseApiUrl, 'some-partner', 'eu', 'en');
-      $caseable.getProductTypes(function(error, productTypes) {
-        expect(error).to.be.undefined;
+      $caseable.getProductTypes(function(err, productTypes) {
+        expect(err).to.be.undefined;
         expect(mockConsole.nErrors).to.equal(0);
         expect(productTypes).to.be.an('array');
-        const modelProductType = XMLHttpRequestData[URLS.productTypes].productTypes[0]
+        const modelProductType = XMLHttpRequestData[URLS.productTypes].productTypes[0];
         productTypes.forEach(function(productType) {
             var prop;
-            for(prop in modelProductType) {
-                expect(productType).to.have.property(prop)
+            for (prop in modelProductType) {
+                expect(productType).to.have.property(prop);
             }
         });
         done();
@@ -303,9 +304,9 @@ describe('Caseable API', function() {
     });
 
     it('Should fail to retrieve products without initialization', function(done) {
-      $caseable.getProducts({}, function(error, products) {
-        expect(error).to.be.an('object');
-        expect(error).to.have.property('error');
+      $caseable.getProducts(undefined, [], function(err, products) {
+        expect(err).to.be.an('object');
+        expect(err).to.have.property('error');
         expect(products).to.be.undefined;
         done();
       });
@@ -313,19 +314,31 @@ describe('Caseable API', function() {
 
     it('Should fail to retrieve products without product type', function(done) {
       $caseable.initialize(baseApiUrl, 'some-partner', 'eu', 'en');
-      $caseable.getProducts({}, function(error, products) {
-        expect(error).to.be.an('object');
-        expect(error).to.have.property('error');
+      $caseable.getProducts(undefined, [], function(err, products) {
+        expect(err).to.be.an('object');
+        expect(err).to.have.property('error');
         expect(products).to.be.undefined;
         done();
       });
     });
 
-    it('Should fail to retrieve products with unknown product type', function(done) {
+    it('Should fail to retrieve products with unknown filter', function(done) {
       $caseable.initialize(baseApiUrl, 'some-partner', 'eu', 'en');
-      $caseable.getProducts({type: 'invalid-type'}, function(error, products) {
-        expect(error).to.be.an('object');
-        expect(error).to.have.property('error');
+      let params = [['invalid-filter', 'value']];
+      $caseable.getProducts('smartphone-hard-case', params, function(err, products) {
+        expect(err).to.be.an('object');
+        expect(err).to.have.property('error');
+        expect(products).to.be.undefined;
+        done();
+      });
+    });
+
+    it('Should fail to retrieve products with multi values for a single filter', function(done) {
+      $caseable.initialize(baseApiUrl, 'some-partner', 'eu', 'en');
+      let params = [['artist', 'amy-sia'], ['artist', 'bioworkz']];
+      $caseable.getProducts('smartphone-hard-case', params, function(err, products) {
+        expect(err).to.be.an('object');
+        expect(err).to.have.property('error');
         expect(products).to.be.undefined;
         done();
       });
@@ -333,15 +346,16 @@ describe('Caseable API', function() {
 
     it('Should search products with proper product type successfully', function(done) {
       $caseable.initialize(baseApiUrl, 'some-partner', 'eu', 'en');
-      $caseable.getProducts({type: 'smartphone-hard-case'}, function(error, products) {
-        expect(error).to.be.undefined;
+      let params = [['artist', 'amy-sia'], ['tags', 'rock'], ['tags', 'fun']];
+      $caseable.getProducts('smartphone-hard-case', params, function(err, products) {
+        expect(err).to.be.undefined;
         expect(mockConsole.nErrors).to.equal(0);
         expect(products).to.be.an('array');
-        const modelProduct = XMLHttpRequestData[URLS.products].products[0]
+        const modelProduct = XMLHttpRequestData[URLS.products].products[0];
         products.forEach(function(product) {
             var prop;
-            for(prop in modelProduct) {
-                expect(product).to.have.property(prop)
+            for (prop in modelProduct) {
+                expect(product).to.have.property(prop);
             }
         });
         done();
