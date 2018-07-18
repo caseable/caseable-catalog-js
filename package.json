@@ -1,0 +1,19 @@
+{
+  "name": "caseable-catalog-js",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "unit-test": "mocha ./tests/unit",
+    "make-dist": "google-closure-compiler --js_output_file dist/caseable.catalog.min.js dist/caseable.catalog.js",
+    "make-docs": "jsdoc src/caseable.catalog.js -d docs"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "google-closure-compiler": "^20180610.0.2",
+    "jsdoc": "^3.5.5",
+    "mocha": "^5.2.0",
+    "rewire": "^4.0.1"
+  }
+}
