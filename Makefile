@@ -16,4 +16,4 @@ clean:
 	rm -rf dist docs
 
 node_modules: package.json
-	npm install .
+	npm install
