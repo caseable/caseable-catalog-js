@@ -88,8 +88,18 @@
   CaseChooser.prototype.init = function(callback) {
     var self = this;
     catalog.getProductTypes(function(error, types) {
-      self.currentProductType = types[0];
+      self.currentProductType = {
+        "id": "smartphone-hard-case",
+        "name": "Smartphone Hard Case",
+        "productionTime": {
+          "max": 6,
+          "min": 3
+        },
+        "sku": "HC"
+      };//types[0];
       self.productTypes = types;
+
+      console.log(self.currentProductType.id, self.device);
 
       catalog.getProducts({type: self.currentProductType.id, device: self.device}, function(error, products) {
         console.log(error, products);
@@ -98,8 +108,6 @@
         callback();
       });
     });
-
-
   };
 
   $.fn.caseableWidget = function(device) {
@@ -111,7 +119,7 @@
       var logo = createLogoSection();
       var productTypes = createProductTypesSection(caseChooser);
       var categories = createcategoriesSection();
-      var products = createProductsSection();
+      var products = createProductsSection(caseChooser);
       wrapper.append(logo);
       wrapper.append(productTypes);
       wrapper.append(categories);
@@ -149,9 +157,16 @@
     return categories;
   }
 
-  function createProductsSection() {
+  function createProductsSection(caseChooser) {
     var products = $('<div/>');
 
+    products.addClass('products');
+    caseChooser.products.forEach(function(product) {
+      console.log(product);
+      var productElement = $('<div/>').text(product.design);
+      productElement.addClass('product');
+      products.append(productElement);
+    });
     return products;
   }
 
