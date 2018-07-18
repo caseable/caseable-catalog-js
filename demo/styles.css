@@ -38,3 +38,7 @@
     margin-left: 8px;
     color: blue;
 }
+
+.product img {
+    max-width: 100px;
+}

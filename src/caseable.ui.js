@@ -127,18 +127,10 @@
     caseChooser.init(function() {
       var wrapper = $('<div/>');
       wrapper.addClass('wrapper');
-      var logo = createLogoSection();
-      var categories = createcategoriesSection();
-      wrapper.append(logo);
+      renderLogoSection(wrapper);
+      renderCategoriesSection(wrapper);
       renderProductTypesSection(wrapper, caseChooser);
-      wrapper.append(categories);
       renderProducts(wrapper, caseChooser);
-
-      wrapper.on('click', '.productType', function() {
-        caseChooser.changeProductType('productType', function() {
-          renderProducts(wrapper, caseChooser);
-        });
-      });
 
       self.append(wrapper);
     });
@@ -151,21 +143,24 @@
 
     products.addClass('products');
     caseChooser.products.forEach(function(product) {
-      var productElement = $('<div/>').text(product.design + product.price);
+      var productElement = $('<div/>');
       productElement.addClass('product');
+      var image = $('<img />');
+      image.attr('src', product.thumbnailUrl);
+      productElement.append(image);
       products.append(productElement);
     });
 
     wrapper.append(products);
   }
 
-  function createLogoSection() {
+  function renderLogoSection(wrapper) {
     var logoSection = $('<div/>');
     logoSection.addClass('logo');
     var header = $('<h3></h3>').text('Deine neue Huelle fuer dein Handy');
     logoSection.append(header);
     logoSection.append(caseableLogo);
-    return logoSection;
+    wrapper.append(logoSection);
   }
 
   function renderProductTypesSection(wrapper, caseChooser) {
@@ -173,6 +168,7 @@
 
     var productTypes = $('<div/>');
     productTypes.addClass('productTypes');
+
     caseChooser.productTypes.forEach(function(type) {
       var typeElement = $('<div/>').text(type.name);
       typeElement.addClass('productType');
@@ -187,10 +183,9 @@
     wrapper.append(productTypes);
   }
 
-  function createcategoriesSection() {
+  function renderCategoriesSection(wrapper) {
     var categories = $('<div/>');
-
-    return categories;
+    wrapper.append(categories);
   }
 
 })(jQuery);
