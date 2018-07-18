@@ -87,6 +87,11 @@
 
   CaseChooser.prototype.init = function(callback) {
     var self = this;
+    self.fetchProductTypes(callback);
+  };
+
+  CaseChooser.prototype.fetchProductTypes = function(callback) {
+    var self = this;
     catalog.getProductTypes(function(error, types) {
       self.currentProductType = {
         "id": "smartphone-hard-case",
@@ -99,15 +104,21 @@
       };//types[0];
       self.productTypes = types;
 
-      console.log(self.currentProductType.id, self.device);
-
-      catalog.getProducts({type: self.currentProductType.id, device: self.device}, function(error, products) {
-        console.log(error, products);
-        self.products = products;
-
-        callback();
-      });
+      self.fetchProducts(self.currentProductType, callback);
     });
+  };
+
+  CaseChooser.prototype.fetchProducts = function(productType, callback) {
+    var self = this;
+    catalog.getProducts({type: productType.id, device: self.device}, function(error, products) {
+      self.products = products;
+      callback();
+    });
+  };
+
+  CaseChooser.prototype.changeProductType = function(productType, callback) {
+    this.currentProductType = productType;
+    this.fetchProducts(productType, callback);
   };
 
   $.fn.caseableWidget = function(device) {
@@ -117,18 +128,36 @@
       var wrapper = $('<div/>');
       wrapper.addClass('wrapper');
       var logo = createLogoSection();
-      var productTypes = createProductTypesSection(caseChooser);
       var categories = createcategoriesSection();
-      var products = createProductsSection(caseChooser);
       wrapper.append(logo);
-      wrapper.append(productTypes);
+      renderProductTypesSection(wrapper, caseChooser);
       wrapper.append(categories);
-      wrapper.append(products);
+      renderProducts(wrapper, caseChooser);
+
+      wrapper.on('click', '.productType', function() {
+        caseChooser.changeProductType('productType', function() {
+          renderProducts(wrapper, caseChooser);
+        });
+      });
 
       self.append(wrapper);
     });
     return this;
   };
+
+  function renderProducts(wrapper, caseChooser) {
+    wrapper.find('.products').remove();
+    var products = $('<div/>');
+
+    products.addClass('products');
+    caseChooser.products.forEach(function(product) {
+      var productElement = $('<div/>').text(product.design + product.price);
+      productElement.addClass('product');
+      products.append(productElement);
+    });
+
+    wrapper.append(products);
+  }
 
   function createLogoSection() {
     var logoSection = $('<div/>');
@@ -139,35 +168,29 @@
     return logoSection;
   }
 
-  function createProductTypesSection(caseChooser) {
+  function renderProductTypesSection(wrapper, caseChooser) {
+    wrapper.find('.productTypes').remove();
+
     var productTypes = $('<div/>');
     productTypes.addClass('productTypes');
     caseChooser.productTypes.forEach(function(type) {
       var typeElement = $('<div/>').text(type.name);
       typeElement.addClass('productType');
+      typeElement.on('click', function() {
+        caseChooser.changeProductType(type, function() {
+          renderProducts(wrapper, caseChooser);
+        });
+      });
       productTypes.append(typeElement);
     });
 
-    return productTypes;
+    wrapper.append(productTypes);
   }
 
   function createcategoriesSection() {
     var categories = $('<div/>');
 
     return categories;
-  }
-
-  function createProductsSection(caseChooser) {
-    var products = $('<div/>');
-
-    products.addClass('products');
-    caseChooser.products.forEach(function(product) {
-      console.log(product);
-      var productElement = $('<div/>').text(product.design);
-      productElement.addClass('product');
-      products.append(productElement);
-    });
-    return products;
   }
 
 })(jQuery);
