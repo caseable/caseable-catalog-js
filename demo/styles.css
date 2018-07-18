@@ -1,0 +1,20 @@
+.logo {
+    width: 200px;
+}
+
+.wrapper {
+    border: 1px solid;
+}
+
+.productTypes {
+    display: flex;
+    margin-top: 8px;
+}
+
+.productType {
+    border: 1px solid grey;
+    width: 100px;
+    height: 100px;
+    border-radius: 3px;
+    margin-left: 8px;
+}
