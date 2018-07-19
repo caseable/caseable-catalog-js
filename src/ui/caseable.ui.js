@@ -18,8 +18,8 @@
 
     this.wrapper = $('<div/>');
     this.wrapper.addClass('csbl-wrapper');
-    this.renderLogoSection();
-    this.renderCategoriesSection();
+    this.renderLogo();
+    this.renderCategories();
 
     container.append(this.wrapper);
     //this.fetchProductTypes();
@@ -32,7 +32,7 @@
       self.selectedProductType = types[0];
       self.productTypes = types;
 
-      self.renderProductTypesSection();
+      self.renderProductTypes();
       self.fetchProducts(self.selectedProductType);
     });
   };
@@ -45,7 +45,7 @@
     });
   };
 
-  CaseChooser.prototype.renderLogoSection = function() {
+  CaseChooser.prototype.renderLogo = function() {
     var logoSection = $('<div/>');
     logoSection.addClass('csbl-logo');
 
@@ -55,7 +55,7 @@
     this.wrapper.append(logoSection);
   };
 
-  CaseChooser.prototype.renderProductTypesSection = function() {
+  CaseChooser.prototype.renderProductTypes = function() {
     var self = this;
     this.wrapper.find('.productTypes').remove();
 
@@ -120,7 +120,7 @@
     this.wrapper.append(products);
   };
 
-  CaseChooser.prototype.renderCategoriesSection = function() {
+  CaseChooser.prototype.renderCategories = function() {
     var categories = $('<div/>');
     this.wrapper.append(categories);
   };
