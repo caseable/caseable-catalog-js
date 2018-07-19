@@ -2,38 +2,37 @@
   var catalog = require('../caseable.catalog');
   var svgs = require('./svgs');
 
-  function CaseChooser(container, device) {
+  function CaseChooser(container, device, selectionChangeCallback) {
     // use getter and setter instead
     this.device = device;
     this.productTypes = null;
     this.products = null;
-    this.selectedProductType = null;
+    // Right now only smartphone hard cases
+    this.selectedProductType = {
+      "id": "smartphone-hard-case",
+      "name": "Smartphone Hard Case",
+      "sku": "HC"
+    };
     this.selectedProducts = [];
+    this.selectionChangeCallback = selectionChangeCallback;
 
     this.wrapper = $('<div/>');
-    this.wrapper.addClass('wrapper');
+    this.wrapper.addClass('csbl-wrapper');
     this.renderLogoSection();
     this.renderCategoriesSection();
 
     container.append(this.wrapper);
-    this.fetchProductTypes();
+    //this.fetchProductTypes();
+    this.fetchProducts(this.selectedProductType);
   }
 
   CaseChooser.prototype.fetchProductTypes = function() {
     var self = this;
     catalog.getProductTypes(function(error, types) {
-      self.selectedProductType = {
-        "id": "smartphone-hard-case",
-        "name": "Smartphone Hard Case",
-        "productionTime": {
-          "max": 6,
-          "min": 3
-        },
-        "sku": "HC"
-      };//types[0];
+      self.selectedProductType = types[0];
       self.productTypes = types;
-      self.renderProductTypesSection();
 
+      self.renderProductTypesSection();
       self.fetchProducts(self.selectedProductType);
     });
   };
@@ -48,9 +47,9 @@
 
   CaseChooser.prototype.renderLogoSection = function() {
     var logoSection = $('<div/>');
-    logoSection.addClass('logo');
+    logoSection.addClass('csbl-logo');
 
-    var header = $('<h3></h3>').text('Deine neue Huelle fuer dein Handy');
+    var header = $('<h4></h4>').text('Deine neue Huelle fuer dein Handy');
     logoSection.append(header);
     logoSection.append(svgs.caseableLogo);
     this.wrapper.append(logoSection);
@@ -61,11 +60,11 @@
     this.wrapper.find('.productTypes').remove();
 
     var productTypes = $('<div/>');
-    productTypes.addClass('productTypes');
+    productTypes.addClass('csbl-productTypes');
 
     this.productTypes.forEach(function(type) {
       var typeElement = $('<div/>').text(type.name);
-      typeElement.addClass('productType');
+      typeElement.addClass('csbl-productType');
       typeElement.on('click', function() {
         self.changeProductType(type);
       });
@@ -80,17 +79,21 @@
     this.wrapper.find('.products').remove();
     var products = $('<div/>');
 
-    products.addClass('products');
+    products.addClass('csbl-products');
     this.products.forEach(function(product) {
+      var isProductSelected = self.isProductSelected(product);
       var productElement = $('<div/>');
-      productElement.addClass('product');
+      productElement.addClass('csbl-product');
 
       var image = $('<img />');
-      image.addClass('product-image');
+      image.addClass('csbl-product-image');
       image.attr('src', product.thumbnailUrl);
 
-      var button = $('<button/>').html('select');
-      button.addClass('select-product-button');
+      var button = $('<button/>').html(svgs.tick);
+      button.addClass('csbl-select-product-button');
+      if (isProductSelected) {
+        button.addClass('selected');
+      }
 
       button.on('click', function() {
         self.toggleProductSelection(product);
@@ -129,27 +132,27 @@
 
   CaseChooser.prototype.toggleProductSelection = function(product) {
     if (this.isProductSelected(product)) {
-      var index = this.selectedProducts.indexOf(product);
+      var index = this.selectedProducts.findIndex(function(p) {
+        return p.sku === product.sku;
+      });
       this.selectedProducts.splice(index, 1);
     } else {
       this.selectedProducts.push(product);
     }
+
+    this.selectionChangeCallback(this.selectedProducts);
   };
 
   CaseChooser.prototype.isProductSelected = function(searchProduct) {
-    return this.selectedProducts.indexOf(searchProduct) !== -1;
+    return this.selectedProducts.findIndex(function(product) {
+      return product.sku === searchProduct.sku;
+    }) !== -1;
   };
 
-  $.fn.caseableWidget = function(device) {
+  $.fn.caseableWidget = function(device, selectionChangeCallback) {
     catalog.initialize('http://catalog.caseable.com', 'partner-id', 'eu', 'de');
-    catalog.getFilters(function(error, res) {
-      console.log(res);
-    });
-    new CaseChooser(this, device);
+    new CaseChooser(this, device, selectionChangeCallback);
     return this;
   };
 
 })(jQuery);
-
-
-

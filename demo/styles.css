@@ -1,17 +1,22 @@
-.logo {
-    width: 200px;
-}
-
-.wrapper {
+.csbl-wrapper {
     border: 1px solid;
 }
 
-.productTypes {
+.csbl-logo {
+    color: #505959;
+}
+
+.csbl-logo svg {
+    max-width: 30%;
+    min-width: 150px;
+}
+
+.csbl-productTypes {
     display: flex;
     margin-top: 8px;
 }
 
-.productType {
+.csbl-productType {
     border: 1px solid grey;
     width: 100px;
     height: 100px;
@@ -20,49 +25,60 @@
     cursor: pointer;
 }
 
-.productType:hover {
+.csbl-productType:hover {
     border-color: green;
     color: green;
 }
 
-.products {
+.csbl-products {
     display: flex;
-    margin: 8px 32px;
+    margin: 8px 16px;
 }
 
-.slick-slide.product {
+.slick-slide.csbl-product {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     border-radius: 3px;
-    margin-left: 8px;
+    margin: 0 4px;
     color: blue;
 }
 
-.product-image {
+.csbl-product-image {
     align-self: center;
     max-width: 100%;
 }
 
-.select-product-button {
-    background: gray;
+.csbl-select-product-button {
+    background: #b6bfbf;
     color: white;
     border: 0;
     border-radius: 4px;
-    padding: 8px;
+    padding: 4px 8px;
     margin: 4px 25%;
     cursor: pointer;
 }
 
-.select-product-button.selected {
+.csbl-select-product-button svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+    stroke: white;
+}
+
+.csbl-select-product-button.selected {
     background: green;
 }
 
-.slick-prev {
+.csbl-products .slick-list {
+    margin: 0 12px;
+}
+
+.csbl-products .slick-prev {
     transform: translate(0, -50%) rotate(180deg);
 }
 
-.slick-arrow {
-    width: 40px;
-    height: 40px;
+.csbl-products .slick-arrow {
+    width: 50px;
+    height: 50px;
 }

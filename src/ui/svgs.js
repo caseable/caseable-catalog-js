@@ -72,6 +72,11 @@ var caseableLogo = "<svg version=\"1.1\" id=\"Ebene_1\" xmlns=\"http://www.w3.or
   "\tc4.3-1.8,8.3-4.5,11.6-7.8c3.3-3.3,6-7.2,7.8-11.6c1.9-4.5,2.9-9.3,2.9-14.2C72.8,31.5,71.8,26.7,69.9,22.2\"/>\n" +
   "</svg>";
 
+var tick = "<svg version=\"1.1\" id=\"Ebene_1\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\"\n" +
+  "\t viewBox=\"0 0 24 24\" style=\"enable-background:new 0 0 24 24;\" xml:space=\"preserve\">\n" +
+  "<path d=\"M9,16.2L4.8,12l-1.4,1.4L9,19L21,7l-1.4-1.4L9,16.2z\"/>\n" +
+  "</svg>";
+
 function slickArrow(extraClass) {
   return "<svg class=\"slick-arrow " + extraClass + "\" version=\"1.1\" id=\"Ebene_1\" xmlns=\"http://www.w3.org/2000/svg\" x=\"0px\" y=\"0px\"\n" +
     "\t viewBox=\"0 0 48 48\" style=\"enable-background:new 0 0 48 48;\" xml:space=\"preserve\">\n" +
@@ -89,4 +94,5 @@ module.exports = {
   caseableLogo: caseableLogo,
   slickPrevArrow: slickPrevArrow,
   slickNextArrow: slickNextArrow,
+  tick: tick
 };
