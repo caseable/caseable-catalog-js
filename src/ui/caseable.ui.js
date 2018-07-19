@@ -7,8 +7,8 @@
     this.device = device;
     this.productTypes = null;
     this.products = null;
-    this.currentProductType = null;
-    this.currentProducts = [];
+    this.selectedProductType = null;
+    this.selectedProducts = [];
 
     this.wrapper = $('<div/>');
     this.wrapper.addClass('wrapper');
@@ -22,7 +22,7 @@
   CaseChooser.prototype.fetchProductTypes = function() {
     var self = this;
     catalog.getProductTypes(function(error, types) {
-      self.currentProductType = {
+      self.selectedProductType = {
         "id": "smartphone-hard-case",
         "name": "Smartphone Hard Case",
         "productionTime": {
@@ -34,7 +34,7 @@
       self.productTypes = types;
       self.renderProductTypesSection();
 
-      self.fetchProducts(self.currentProductType);
+      self.fetchProducts(self.selectedProductType);
     });
   };
 
@@ -76,6 +76,7 @@
   };
 
   CaseChooser.prototype.renderProducts = function() {
+    var self = this;
     this.wrapper.find('.products').remove();
     var products = $('<div/>');
 
@@ -90,6 +91,11 @@
 
       var button = $('<button/>').html('select');
       button.addClass('select-product-button');
+
+      button.on('click', function() {
+        self.toggleProductSelection(product);
+        button.toggleClass('selected');
+      });
 
       productElement.append(image);
       productElement.append(button);
@@ -117,8 +123,21 @@
   };
 
   CaseChooser.prototype.changeProductType = function(productType) {
-    this.currentProductType = productType;
+    this.selectedProductType = productType;
     this.fetchProducts(productType);
+  };
+
+  CaseChooser.prototype.toggleProductSelection = function(product) {
+    if (this.isProductSelected(product)) {
+      var index = this.selectedProducts.indexOf(product);
+      this.selectedProducts.splice(index, 1);
+    } else {
+      this.selectedProducts.push(product);
+    }
+  };
+
+  CaseChooser.prototype.isProductSelected = function(searchProduct) {
+    return this.selectedProducts.indexOf(searchProduct) !== -1;
   };
 
   $.fn.caseableWidget = function(device) {

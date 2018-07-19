@@ -45,13 +45,17 @@
 }
 
 .select-product-button {
-    background: green;
+    background: gray;
     color: white;
     border: 0;
     border-radius: 4px;
     padding: 8px;
     margin: 4px 25%;
     cursor: pointer;
+}
+
+.select-product-button.selected {
+    background: green;
 }
 
 .slick-prev {
