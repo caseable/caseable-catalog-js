@@ -4,20 +4,24 @@
 
   catalog.initialize('http://catalog.caseable.com', 'partner-id', 'eu', 'de');
 
-  function CaseChooser(device) {
+  function CaseChooser(container, device) {
+    // use getter and setter instead
     this.device = device;
     this.productTypes = null;
     this.products = null;
     this.currentProductType = null;
     this.currentProducts = [];
+
+    this.wrapper = $('<div/>');
+    this.wrapper.addClass('wrapper');
+    this.renderLogoSection();
+    this.renderCategoriesSection();
+
+    container.append(this.wrapper);
+    this.fetchProductTypes();
   }
 
-  CaseChooser.prototype.init = function(callback) {
-    var self = this;
-    self.fetchProductTypes(callback);
-  };
-
-  CaseChooser.prototype.fetchProductTypes = function(callback) {
+  CaseChooser.prototype.fetchProductTypes = function() {
     var self = this;
     catalog.getProductTypes(function(error, types) {
       self.currentProductType = {
@@ -30,78 +34,61 @@
         "sku": "HC"
       };//types[0];
       self.productTypes = types;
+      self.renderProductTypesSection();
 
-      self.fetchProducts(self.currentProductType, callback);
+      self.fetchProducts(self.currentProductType);
     });
   };
 
-  CaseChooser.prototype.fetchProducts = function(productType, callback) {
+  CaseChooser.prototype.fetchProducts = function(productType) {
     var self = this;
     catalog.getProducts({type: productType.id, device: self.device}, function(error, products) {
       self.products = products;
-      callback();
+      self.renderProducts();
     });
   };
 
-  CaseChooser.prototype.changeProductType = function(productType, callback) {
-    this.currentProductType = productType;
-    this.fetchProducts(productType, callback);
-  };
-
-  $.fn.caseableWidget = function(device) {
-    var self = this;
-    var caseChooser = new CaseChooser(device);
-    caseChooser.init(function() {
-      var wrapper = $('<div/>');
-      wrapper.addClass('wrapper');
-      renderLogoSection(wrapper);
-      renderCategoriesSection(wrapper);
-      renderProductTypesSection(wrapper, caseChooser);
-      renderProducts(wrapper, caseChooser);
-
-      self.append(wrapper);
-    });
-    return this;
-  };
-
-  function renderLogoSection(wrapper) {
+  CaseChooser.prototype.renderLogoSection = function() {
     var logoSection = $('<div/>');
     logoSection.addClass('logo');
+
     var header = $('<h3></h3>').text('Deine neue Huelle fuer dein Handy');
     logoSection.append(header);
     logoSection.append(svgs.caseableLogo);
-    wrapper.append(logoSection);
-  }
+    this.wrapper.append(logoSection);
+  };
 
-  function renderProductTypesSection(wrapper, caseChooser) {
-    wrapper.find('.productTypes').remove();
+  CaseChooser.prototype.renderProductTypesSection = function() {
+    var self = this;
+    this.wrapper.find('.productTypes').remove();
 
     var productTypes = $('<div/>');
     productTypes.addClass('productTypes');
 
-    caseChooser.productTypes.forEach(function(type) {
+    this.productTypes.forEach(function(type) {
       var typeElement = $('<div/>').text(type.name);
       typeElement.addClass('productType');
       typeElement.on('click', function() {
-        caseChooser.changeProductType(type, function() {
-          renderProducts(wrapper, caseChooser);
-        });
+        self.changeProductType(type);
       });
+
       productTypes.append(typeElement);
     });
-    wrapper.append(productTypes);
-  }
+    this.wrapper.append(productTypes);
+  };
 
-  function renderProducts(wrapper, caseChooser) {
-    wrapper.find('.products').remove();
+  CaseChooser.prototype.renderProducts = function() {
+    this.wrapper.find('.products').remove();
     var products = $('<div/>');
 
     products.addClass('products');
-    caseChooser.products.forEach(function(product) {
+    this.products.forEach(function(product) {
       var productElement = $('<div/>');
       productElement.addClass('product');
+
       var image = $('<img />');
       image.attr('src', product.thumbnailUrl);
+
       productElement.append(image);
       products.append(productElement);
     });
@@ -117,13 +104,23 @@
       });
     });
 
-    wrapper.append(products);
-  }
+    this.wrapper.append(products);
+  };
 
-  function renderCategoriesSection(wrapper) {
+  CaseChooser.prototype.renderCategoriesSection = function() {
     var categories = $('<div/>');
-    wrapper.append(categories);
-  }
+    this.wrapper.append(categories);
+  };
+
+  CaseChooser.prototype.changeProductType = function(productType) {
+    this.currentProductType = productType;
+    this.fetchProducts(productType);
+  };
+
+  $.fn.caseableWidget = function(device) {
+    new CaseChooser(this, device);
+    return this;
+  };
 
 })(jQuery);
 
