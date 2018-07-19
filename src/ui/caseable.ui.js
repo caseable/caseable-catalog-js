@@ -1,4 +1,6 @@
 (function($){
+  require('slick-carousel');
+  require('./styles.css');
   var catalog = require('../caseable.catalog');
   var svgs = require('./svgs');
 

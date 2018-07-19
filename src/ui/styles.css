@@ -35,8 +35,8 @@
     margin: 8px 16px;
 }
 
-.slick-slide.csbl-product {
-    display: flex;
+.csbl-product {
+    display: flex !important;
     flex-direction: column;
     align-items: stretch;
     border-radius: 3px;
