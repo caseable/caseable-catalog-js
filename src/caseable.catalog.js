@@ -59,27 +59,30 @@
 
 'use strict';
 
-  function clone(obj) {
-    if (typeof obj == 'object') {
-      var isArray = typeof obj.indexOf == 'function';
-      var objClone = isArray ? [] : {};
-      for (var i in obj) {
-        if (obj.hasOwnProperty(i)) {
-          if (isArray) objClone.push(clone(obj[i]));
-          else objClone[i] = clone(obj[i]);
-        }
-      }return objClone;
-    } else {
-      returnobj;
-  }}
-
-  function BaseClass(attributes, init) {
-    var self = this;
-    init = init || {};this.attributes = clone(attributes);
-    this.attributes.forEach(function(attribute) {
-      self[attribute] =  init[attribute];
-    });
+function clone(obj) {
+  if (typeof obj == 'object') {
+    var isArray = typeof obj.indexOf == 'function';
+    var objClone = isArray ? [] : {};
+    for (var i in obj) {
+      if (obj.hasOwnProperty(i)) {
+        if (isArray) objClone.push(clone(obj[i]));
+        else objClone[i] = clone(obj[i]);
+      }
+    }
+    return objClone;
+  } else {
+    return obj;
   }
+}
+
+function BaseClass(attributes, init) {
+  var self = this;
+  init = init || {};
+  this.attributes = clone(attributes);
+  this.attributes.forEach(function(attribute) {
+    self[attribute] = init[attribute];
+  });
+}
 
 BaseClass.prototype.toObject = function() {
   var obj = {};
@@ -91,24 +94,24 @@ BaseClass.prototype.toObject = function() {
   return clone(obj);
 };
 
- /**
-  * @constructor
-  * @description represents a caseable product (e.g. hard case for samsung galaxy)
-  * @memberof $caseable
-  *
-  * @param {Object} init
-  * @param {string} init.sku the product's stock keeping number
-  * @param {string} init.artist the author name
-  * @param {string} init.design the design title
-  * @param {string} init.type product's type (e.g. hard case, flip case, etc)
-  * @param {string} init.device the device for which the product is designed
-  * @param {Object} init.productionTime
-  * @param {int} init.productionTime.min minimum production time in days
-  * @param {int} init.productionTime.max maximum production time in days
-  * @param {string} init.thumbnailUrl url to the thumbnail image
-  * @param {integer} init.price product's price
-  * @param {string} init.currency price currency
-  */
+/**
+ * @constructor
+ * @description represents a caseable product (e.g. hard case for samsung galaxy)
+ * @memberof $caseable
+ *
+ * @param {Object} init
+ * @param {string} init.sku the product's stock keeping number
+ * @param {string} init.artist the author name
+ * @param {string} init.design the design title
+ * @param {string} init.type product's type (e.g. hard case, flip case, etc)
+ * @param {string} init.device the device for which the product is designed
+ * @param {Object} init.productionTime
+ * @param {int} init.productionTime.min minimum production time in days
+ * @param {int} init.productionTime.max maximum production time in days
+ * @param {string} init.thumbnailUrl url to the thumbnail image
+ * @param {integer} init.price product's price
+ * @param {string} init.currency price currency
+ */
 function Product(init) {
   var attributes = [
     'sku',
@@ -213,20 +216,18 @@ var initialized = false;
 
 // private methods
 
-  function log(message) {
-    console && console.info && console.info(message);
-  }
+function log(message) {
+  console && console.info && console.info(message);
+}
 
-  function logError(message) {
-    console && console.error && console.error(message);
-  }
+function logError(message) {
+  console && console.error && console.error(message);
+}
 
+function getXhrInstance() {
+  if (XMLHttpRequest) return new XMLHttpRequest();
 
-
-  function getXhrInstance() {
-    if (XMLHttpRequest)
-      return new XMLHttpRequest();
-    if (ActiveXObject) {
+  if (ActiveXObject) {
     try {
       return new ActiveXObject('Msxml3.XMLHTTP');
     } catch (e) {}
@@ -236,83 +237,81 @@ var initialized = false;
     try {
       return new ActiveXObject('Msxml2.XMLHTTP.3.0');
     } catch (e) {}
-    }
-
-    return null;
   }
+
+  return null;
+}
 
 function ajaxRequest(method, endpoint, parameters, credentials, callback) {
 
   var xhr = getXhrInstance();
   var url;
   var query = '';
-    callback = typeof callback === 'function' ? callback : function() {};
+  callback = typeof callback === 'function' ? callback : function() {};
 
-    if (!xhr) {
-      logError('Failed to instiantiate XHR, quitting!');
-      callback({connectionError: 'Failed to instiantiate XHR, quitting!'});return;
-    }
+  if (!xhr) {
+    logError('Failed to instiantiate XHR, quitting!');
+    callback({connectionError: 'Failed to instiantiate XHR, quitting!'});
+    return;
+  }
 
-
-
-    if (method === 'GET' && parameters) {
-      var query = '?';
-      parameters.forEach(function(pair) {
-        varname= pair[0];
-        var value = pair[1];
-        query += encodeURIComponent(name) + '=' + encodeURIComponent(value) + '&';
-      });
-      query = query.substring(0, query.length - 1);
-    }
+  if (method === 'GET' && parameters) {
+    var query = '?';
+    parameters.forEach(function(pair) {
+      var name = pair[0];
+      var value = pair[1];
+      query += encodeURIComponent(name) + '=' + encodeURIComponent(value) + '&';
+    });
+    query = query.substring(0, query.length - 1);
+  }
 
   url = baseApiUrl + endpoint + query;
 
-    xhr.addEventListener('load', function() {
-      var response;
-      var error = {};
-      try {
-        response = JSON.parse(xhr.responseText);
-      } catch (e) {
-        response = xhr.responseText;
-        error['parseError'] = e.toString();
+  xhr.addEventListener('load', function() {
+    var response;
+    var error = {};
+    try {
+      response = JSON.parse(xhr.responseText);
+    } catch (e) {
+      response = xhr.responseText;
+      error['parseError'] = e.toString();
       callback(error, response);
-        return;}
-      if (xhr.status === 200 || xhr.status === 201) {
-        callback ( undefined,
-          response);
+      return;
+    }
+    if (xhr.status === 200 || xhr.status === 201) {
+      callback(undefined, response);
+    } else {
+      logError('Request failed. Returned status of ' + xhr.status);
+      error['invalidStatus'] = xhr.status;
+      callback(error, response);
+    }
+  });
 
-      } else {
-        logError('Request failed. Returned status of ' + xhr.status);
-        error['invalidStatus'] = xhr.status;
-         callback(error, response);
-      }
-    });
+  xhr.addEventListener('error', function() {
+    var error = {
+      error: 'transfer error occurred'
+    };
+    try {
+      error.payload = JSON.parse(xhr.responseText);
+    } catch (e) {
+      error.payload = xhr.responseText;
+      error['parseError'] = e.toString();
+    }
+    callback(error);
+  });
 
-    xhr.addEventListener('error', function() {
-      var  error = {
-        error: 'transfer error occurred'
-      };
-      try {
-        error.payload = JSON.parse(xhr.responseText);
-      } catch (e) {
-        error.payload = xhr.responseText;
-        error['parseError'] = e.toString();
-      }
-       callback(error);
-    });
-
-    xhr.addEventListener('abort', function() {
-      var  error = {
-        error: 'transfer aborted'
-      };
-      try {
-        error.payload = JSON.parse(xhr.responseText);
-      } catch (e) {
-        error.payload = xhr.responseText;
-        error['parseError'] = e.toString();
-      }
-       callback(error);
-    });
+  xhr.addEventListener('abort', function() {
+    var error = {
+      error: 'transfer aborted'
+    };
+    try {
+      error.payload = JSON.parse(xhr.responseText);
+    } catch (e) {
+      error.payload = xhr.responseText;
+      error['parseError'] = e.toString();
+    }
+    callback(error);
+  });
 
   xhr.open(method, url);
   xhr.setRequestHeader('Accept', 'application/caseable.v1+json');
@@ -356,17 +355,15 @@ function initialize(argBaseApiUrl, argPartner, argRegion, argLang) {
     return false;
   }
 
-
-
-    initialized = true;
-    return true;
-  }
+  initialized = true;
+  return true;
+}
 
 function reset() {
   partner = undefined;
-    lang = undefined;
-    region = undefined;
-    baseApiUrl = undefined;
+  lang = undefined;
+  region = undefined;
+  baseApiUrl = undefined;
   initialized = false;
 }
 
@@ -380,27 +377,27 @@ function reset() {
  * @param {Function} callback a callback which receives an array of {@link $caseable.Device}
  */
 function getDevices(callback) {
-    callback = typeof callback === 'function' ? callback : function() {};
+  callback = typeof callback === 'function' ? callback : function() {};
 
   if (!initialized) {
-       callback({error: 'The API needs to be initialized successfully first'});
-       return;
-    }
+    callback({error: 'The API needs to be initialized successfully first'});
+    return;
+  }
 
-    ajaxRequest(
-      'GET',
-      '/devices/',
 
-      undefined,
-      undefined,
-      function(error, data) {
-        if (error || !data.devices) {
-          logError('failed to retrieve devices');
-          log(data);
-           callback(error, data);
-          return;
-        }
-         callback(undefined, data.devices);
+  ajaxRequest(
+    'GET',
+    '/devices/',
+    undefined,
+    undefined,
+    function(error, data) {
+      if (error || !data.devices) {
+        logError('failed to retrieve devices');
+        log(data);
+        callback(error, data);
+        return;
+      }
+      callback(undefined, data.devices);
 
     }
   );
@@ -417,30 +414,29 @@ function getDevices(callback) {
  * @param {Function} callback a callback which receives an array of {@link $caseable.Filter}
  */
 function getFilters(callback) {
-    callback = typeof callback === 'function' ? callback : function() {};
+  callback = typeof callback === 'function' ? callback : function() {};
 
   if (!initialized) {
-       callback({error: 'The API needs to be initialized successfully first'});
-       return;
-    }
-
-    ajaxRequest(
-      'GET',
-      '/filters/',
-
-      undefined,
-      undefined,
-      function(error, data) {
-        if (error || !data.filters) {
-          logError('failed to retrieve filters');
-          log(data);
-           callback(error, data);
-          return;
-        }
-         callback(undefined, data.filters);
-      }
-    );
+    callback({error: 'The API needs to be initialized successfully first'});
+    return;
   }
+
+  ajaxRequest(
+    'GET',
+    '/filters/',
+    undefined,
+    undefined,
+    function(error, data) {
+      if (error || !data.filters) {
+        logError('failed to retrieve filters');
+        log(data);
+        callback(error, data);
+        return;
+      }
+      callback(undefined, data.filters);
+    }
+  );
+}
 
 /**
  * @function
@@ -453,33 +449,37 @@ function getFilters(callback) {
  * @param {Function} callback a callback which receives an array of strings
  */
 function getFilterOptions(filterName, callback) {
-    callback = typeof callback === 'function' ? callback : function() {};
+  callback = typeof callback === 'function' ? callback : function() {};
 
   if (!initialized) {
-       callback({error: 'The API needs to be initialized successfully first'});
-       return;
+    callback({error: 'The API needs to be initialized successfully first'});
+    return;
+  }
+
+  getFilters(function(error, filters) {
+    if (error) {
+      callback({error: 'failed to retrieve filters'});
+      return;
+    }
+    var filterNames = filters.map(function(filter) {return filter.name});
+    if (filterNames.indexOf(filterName) < 0) {
+      callback(
+        {
+          message: '`' + filterName + '` not found in the supported filters,' +
+          ' please use the list from $caseable.getFilters'
+        }
+      );
+      return;
     }
 
-    getFilters(function(error, filters) {
-      if (error) {
-         callback({error: 'failed to retrieve filters'});
-        return;
-      }
-      var filterNames =filters.map(function(filter) {return filter.name});
-      if (filterNames.indexOf(filterName) < 0) {
-        callback (
-          {
-            message: '`' + filterName + '` not found in the supported filters,' +
-              ' please use the list from $caseable.getFilters'
-          }
-        );
-        return;
-      }
-
-      ajaxRequest('GET', '/filters/' + filterName, [['partner', partner]], undefined, callback
+    ajaxRequest(
+      'GET', '/filters/' + filterName,
+      [['partner', partner]],
+      undefined,
+      callback
     );
   });
-  }
+}
 
 /**
  * @function
@@ -491,126 +491,123 @@ function getFilterOptions(filterName, callback) {
  * @param {Function} callback a callback which receives an array of {@link $caseable.ProductType}
  */
 function getProductTypes(callback) {
-    callback = typeof callback === 'function' ? callback : function() {};
+  callback = typeof callback === 'function' ? callback : function() {};
 
   if (!initialized) {
-       callback({error: 'The API needs to be initialized successfully first'});
-       return;
+    callback({error: 'The API needs to be initialized successfully first'});
+    return;
+  }
+
+  ajaxRequest(
+    'GET',
+    '/products/',
+    [
+      ['partner', partner],
+      ['lang', lang],
+      ['region', region]
+    ],
+    undefined,
+    function(error, data) {
+      if (error || !data.productTypes) {
+        logError('failed to retrieve product types');
+        log(error);
+        log(data);
+        callback(error, data);
+        return;
+      }
+      callback(undefined, data.productTypes);
+    }
+  );
+}
+/**
+ * @typedef {Array<Array<string, string>>} PairsArray
+ */
+/**
+ * @function
+ *
+ * @description searches the catalog for products with the given parameters
+ *
+ * @memberof $caseable
+ *
+ *
+ *
+ * @param {string} params.type product type, this is the only mandatory parameter
+ * @param {Object[]} params search parameters as an array of name-value pairs.
+ *                possible parameters are documented below
+ * @param {string} params[].0 one of {'artist', 'device', 'category',
+ *                 'color', 'gender', 'tag', 'limit', 'page'}
+ *
+ * @param {string} params[].1 comma-separated list of ids, excluding the attributes: <br>
+ *                 'gender': 'male' or 'female' <br>
+ *                 'page' and 'limit': an integer
+ * @param {Function} callback a callback which receives an array of {@link $caseable.Product}
+ */
+function getProducts(type, params, callback) {
+  callback = typeof callback === 'function' ? callback : function() {};
+
+  if (!initialized) {
+    callback({error: 'The API needs to be initialized successfully first'});
+    return;
+  }
+
+  if (!type) {
+    var typeRequiredMsg = '`type` parameter is required';
+    logError(typeRequiredMsg);
+    callback({error: typeRequiredMsg});
+    return;
+  }
+
+  getFilters(function(error, filters) {
+    if (error) {
+      callback({error: 'failed to retrieve filters'});
+      return;
     }
 
+    var filterIsMultiValue = {};
 
-    ajaxRequest('GET',
-      '/products/',
-      [
-        ['partner', partner],
-        ['lang', lang],
-        ['region', region]
-      ],
-      undefined,
-      function(error, data) {
-        if (error || !data.productTypes) {
-          logError('failed to retrieve product types');
-          log(error);
-          log(data);
-           callback(error, data);
-          return;
-        }
-         callback(undefined, data.productTypes) ;
-          }
-        );
+    filters.forEach(function(filter) {
+      filterIsMultiValue[filter.name] = filter.multiValue;
+    });
+
+    var errors = [];
+    var seen = {};
+    params.forEach(function(pair) {
+      var name = pair[0];
+      // if (filterIsMultiValue[name] === undefined) {
+      //   errors.push('undefined filter ' + name);
+      //   return;
+      // }
+      if (seen[name] && !filterIsMultiValue[name]) {
+        errors.push('multiple values are not allowed for ' + name);
+        return;
       }
-    /**
-  * @typedef {Array<Array<string, string>>} PairsArray
-*/
-  /**
-   * @function
-   *
-   * @description searches the catalog for products with the given parameters
-   *
-   * @memberof $caseable
-   *
-   * *
-   * @param {string} params.type product type, this is the only mandatory parameter
-   * @param {Object[]} paramssearch parameters as an array of name-value pairs.
-   * possible parameters are documented below
-   * @param {string} params[].0 one of {'artist', 'device', 'category ',
-   *                 'color', 'gender', 'tag', 'limit', 'page'}
-   *
-   * @param {string} params[].1 comma-separated list of  ids, excluding the attributes: <br>
-   * 'gender ': 'male' or 'female' <br>
-   * ' page ' and 'limit': an integer
-   * @param {Function} callback a callback which receives an array of {@link $caseable.Product}
-   */
-  function getProducts(type,params, callback) {callback = typeof callback === 'function' ? callback : function() {};
+      seen[name] = true;
+    });
 
-    if (!initialized){
-      callback ({
-          error: 'The API needs to be initialized successfully first'}
+    if (errors.length > 0) {
+      callback(
+        {
+          error: 'Params have the following issues:\n  ' + errors.join('\n  ')
+        }
       );
       return;
     }
 
-    if (!type) {
-      var typeRequiredMsg = '`type` parameter is required';
-      logError(typeRequiredMsg);
-      callback({error: typeRequiredMsg});
-      return;
-    }
-
-      getFilters(function(error, filters) {if (error) {
-         callback({error: 'failed to retrieve filters'});
+    var queryParams = params.concat([
+      ['partner', partner],
+      ['lang', lang],
+      ['region', region]
+    ]);
+    ajaxRequest('GET', '/products/' + type, queryParams, undefined, function(error, data) {
+      if (error || !data.products) {
+        logError('failed to retrieve products');
+        callback(error, data);
         return;
       }
-
-      var filterIsMultiValue = {};
-
-      filters.forEach(function(filter) {
-          filterIsMultiValue[filter.name] = filter.multiValue;
-      });
-        var errors = [];
-         var seen = {};
-             params.forEach(function(pair) {
-            var name = pair[0];
-          var value = pair[1];
-          if (filterIsMultiValue[name] ===undefined) {
-        errors.push('undefined filter ' + name);
-        return;
-      }
-
-       if (seen[name] && !filterIsMultiValue[name]) {
-
-      errors.push('multiple values are not allowed for ' + name);
-      return;
-      }
-        seen[name] = true;
-      });
-
-      if (errors.length > 0) {
-        callback(
-      {
-      error: 'Params have the following issues:\n  ' + errors.join('\n  ')
-          }
-        );
-        return;
-      }
-
-      var queryParams = params.concat([
-          ['partner', partner],
-          ['lang', lang],
-          ['region', region]
-      ]);ajaxRequest('GET', '/products/' + type,  queryParams, undefined, function(error, data) {
-        if (error || !data.products) {
-          logError('failed to retrieve products');
-          callback(error, data);
-          return;
-        }
-        callback (
-          undefined,
-          data.products
-        );
-      });
+      callback(undefined, data.products);
     });
-  }
+  });
+}
 
 // public methods
 
@@ -625,4 +622,3 @@ var publicApi = {
 };
 
 module.exports = publicApi;
-

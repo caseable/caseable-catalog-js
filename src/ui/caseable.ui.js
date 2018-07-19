@@ -2,8 +2,6 @@
   var catalog = require('../caseable.catalog');
   var svgs = require('./svgs');
 
-  catalog.initialize('http://catalog.caseable.com', 'partner-id', 'eu', 'de');
-
   function CaseChooser(container, device) {
     // use getter and setter instead
     this.device = device;
@@ -42,7 +40,7 @@
 
   CaseChooser.prototype.fetchProducts = function(productType) {
     var self = this;
-    catalog.getProducts({type: productType.id, device: self.device}, function(error, products) {
+    catalog.getProducts(productType.id, [["device", self.device]], function(error, products) {
       self.products = products;
       self.renderProducts();
     });
@@ -87,9 +85,15 @@
       productElement.addClass('product');
 
       var image = $('<img />');
+      image.addClass('product-image');
       image.attr('src', product.thumbnailUrl);
 
+      var button = $('<button/>').html('select');
+      button.addClass('select-product-button');
+
       productElement.append(image);
+      productElement.append(button);
+
       products.append(productElement);
     });
 
@@ -118,6 +122,10 @@
   };
 
   $.fn.caseableWidget = function(device) {
+    catalog.initialize('http://catalog.caseable.com', 'partner-id', 'eu', 'de');
+    catalog.getFilters(function(error, res) {
+      console.log(res);
+    });
     new CaseChooser(this, device);
     return this;
   };
