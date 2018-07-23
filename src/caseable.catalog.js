@@ -571,10 +571,10 @@ function getProducts(type, params, callback) {
     var seen = {};
     params.forEach(function(pair) {
       var name = pair[0];
-      // if (filterIsMultiValue[name] === undefined) {
-      //   errors.push('undefined filter ' + name);
-      //   return;
-      // }
+      if (filterIsMultiValue[name] === undefined) {
+        errors.push('undefined filter ' + name);
+        return;
+      }
       if (seen[name] && !filterIsMultiValue[name]) {
         errors.push('multiple values are not allowed for ' + name);
         return;
