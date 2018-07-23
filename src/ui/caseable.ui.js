@@ -13,7 +13,6 @@
     // Right now only smartphone hard cases
     this.selectedProductType = {
       "id": "smartphone-hard-case",
-      "name": "Smartphone Hard Case",
       "sku": "HC"
     };
     this.selectedProducts = [];
@@ -52,7 +51,7 @@
     var logoSection = $('<div/>');
     logoSection.addClass('csbl-logo');
 
-    var header = $('<h4></h4>').text('Deine neue Huelle fuer dein Handy');
+    var header = $('<h4></h4>').text('Deine neue Hülle für dein Handy');
     logoSection.append(header);
     logoSection.append(svgs.caseableLogo);
     this.wrapper.append(logoSection);
