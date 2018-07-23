@@ -1,6 +1,6 @@
 var resolve = require('rollup-plugin-node-resolve');
 var commonjs = require('rollup-plugin-commonjs');
-var uglify = require('rollup-plugin-uglify');
+var uglify = require('rollup-plugin-uglify').uglify;
 var postCss = require('rollup-plugin-postcss');
 
 // `npm run build` -> `production` is true
@@ -11,7 +11,7 @@ module.exports = {
   input: 'src/ui/caseable.ui.js',
   external: ['jquery'],
   output: {
-    name: '$caseable',
+    name: '$caseable222',
     file: 'demo/caseable.js',
     format: 'iife', // immediately-invoked function expression — suitable for <script> tags
     sourcemap: true,
