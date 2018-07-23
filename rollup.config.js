@@ -11,7 +11,7 @@ module.exports = {
   input: 'src/ui/caseable.ui.js',
   external: ['jquery'],
   output: {
-    name: '$caseable222',
+    name: '$caseable', // This is not really used, but just to shut up the warning
     file: 'demo/caseable.js',
     format: 'iife', // immediately-invoked function expression — suitable for <script> tags
     sourcemap: true,
