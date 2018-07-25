@@ -19,7 +19,7 @@
     this.selectionChangeCallback = selectionChangeCallback;
 
     this.$wrapper = $('<div/>');
-    this.$wrapper.addClass('csbl-$wrapper');
+    this.$wrapper.addClass('csbl-wrapper');
     this.renderLogo();
 
     $container.append(this.$wrapper);
