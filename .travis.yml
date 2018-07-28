@@ -1,0 +1,26 @@
+branches:
+  only:
+    - master
+
+language: node_js
+
+node_js:
+  - 8
+
+cache:
+ directories:
+   - node_modules
+
+install:
+  - npm install
+  - make dist
+
+script:
+  - make test
+
+notifications:
+slack:
+  rooms:
+    - caseable-it:u112tY4pOYwdJFyfHzd4MTBl
+  on_success: change
+  on_failure: always
