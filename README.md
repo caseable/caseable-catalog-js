@@ -13,7 +13,20 @@ to use the library in your app.
 2. Clone the repository somewhere (say `<repo-directory>`).
 3. Optionally make sure the tests pass:
 
-    `cd <repo-directory> && make test`
+    `cd <repo-directory> && npm run test`
 4. Create the distribution package and documentation:
 
-    `cd <repo-directory> && make dist docs`
+    `cd <repo-directory> && npm run build:catalog && npm run build:docs`
+    
+
+## UI Part
+
+To build the ui library run the following command:
+
+    `npm run build:ui`
+    
+To run demo application:
+1. run the following command:
+
+    `npm run dev`
+2. open localhost:5000 in the browser
